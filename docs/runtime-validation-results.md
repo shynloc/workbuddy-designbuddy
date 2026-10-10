@@ -28,6 +28,8 @@ last_updated: 2026-10-10
 | qa-20261011-015550-2691 | designbuddy-qa 0.1.0（未直接记录 ZIP 哈希；PKG-004 校验 46 个文件一致） | Windows 11 · WorkBuddy 5.7.7.0 · 本地 · 未加密 · 开发者 | 55/56（PKG-005 FAIL） | 1 个 P0、1 个被误判的 P1（脱敏）；**INS-002 的 PASS 作废**（很可能是 H5，见第 2 轮） | v0.1.1，见 `qa/history/FIX_REPORT-v0.1.1.md` |
 | qa-20261011-025430-7c19 | designbuddy-qa 0.1.1（manifest `45a2f988…`，与发布一致） | Windows 11 · WorkBuddy 5.7.7 · 本地 · 未加密 · 开发者 | **57/57** | v0.1.1 的修复在真机验证通过；INS-003 FAIL（平台限制）；agent-notes 泄漏用户名路径；H3b/H4 未测 | v0.1.2，见 `qa/FIX_REPORT.md` |
 
+| 平台上传 | designbuddy 1.0.0（`2d3b5ffd…`，两级目录） | WorkBuddy 开放平台 | — | **PLATFORM_PARSE_PASSED**（此前 `a5bb610e…` 因目录层级超限被拒） | 等待审核 → 付费加密实测（POST_LAUNCH_TEST.md） |
+
 > 下文的 T-* 条目来自第一轮 Probe 计划（已被 QA 候选版取代），保留以作历史记录。
 
 ## 预检（非 WorkBuddy 环境，不作为证据）

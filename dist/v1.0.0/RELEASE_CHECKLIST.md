@@ -28,7 +28,7 @@
 |---|---|---|
 | LOCAL_QA_PASSED | 本地验证 | ✅ 开发机商业包 6/6；Windows 真机 QA v0.1.1 的 SCRIPT 57/57；交付功能已在 QA v0.1.3 中实现 |
 | READY_FOR_PLATFORM_SUBMISSION | 包可以交给你上传 | ✅ 本包 |
-| PLATFORM_PARSE_PASSED | 开放平台上传并解析成功 | ⏳ 待你上传 |
+| PLATFORM_PARSE_PASSED | 开放平台上传并解析成功 | ✅ 2026-10-11，构建 `2d3b5ffd…`（产品负责人上传确认） |
 | REVIEW_APPROVED | 平台审核通过 | ⏳ |
 | PAID_ENCRYPTED_RUNTIME_VERIFIED | 付费加密后在真实环境中可用 | ⏳ 见 D |
 
