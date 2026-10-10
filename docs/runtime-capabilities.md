@@ -22,8 +22,10 @@ last_updated: 2026-10-10
 | `OBSERVED` | 真实环境实测 |
 | `DERIVED` | 基于上述信息推导出的工程判断 |
 | `EXPERIMENTAL` | 已设计，未充分验证 |
-| `UNVERIFIED` / `TO TEST` | 无证据，待验证 |
+| `UNVERIFIED` | 无证据，待验证。下表中的"TO TEST"表示已经安排了验证用例，证据等级仍然是 UNVERIFIED |
 | `STALE` | 上游已变化，待复核 |
+
+> **代表性规则**：单次实验结果写成 `OBSERVED（条件：系统 / 来源 / 是否加密 / 账号类型）`，不得上升为通用平台保证。未加密形态的结果不能代表加密形态。测试结果原文见 [`runtime-validation-results.md`](runtime-validation-results.md)。
 
 ## A. Skill 包与开放平台
 
@@ -36,7 +38,8 @@ last_updated: 2026-10-10
 | A5 | 符合上述结构的 ZIP 能被开放平台解析，并进入审核 | `OBSERVED` | WB-OPDK `95-validation/wechat-article-publishing-skill.md` | — |
 | A6 | 根目录可以有官方结构以外的文件或目录（DESIGN.md、assets/ 等） | `UNVERIFIED` | 发布包实测时去掉了 README/CHANGELOG | V-PK-02 |
 | A7 | Skill 包的大小、文件数上限，以及能否包含二进制文件（字体、.potx 等） | `UNVERIFIED` | — | V-PK-04, V-OF-01 |
-| A8 | `category` 字段的可选值是否包含 `design` | `UNVERIFIED` | 开放平台前端文案中，专家类目里出现过 design（"设计"）选项；Skill 的 category 是否相同未确认 | V-PK-03 |
+| A8 | `category` 字段的可选值是否包含 `design` | `UNVERIFIED` | 开放平台前端文案中，专家类目里出现过 design（"设计"）选项；Skill 的 category 是否相同未确认。Probe 中暂不填写 category | V-PK-03 |
+| A9 | `@references/x.md` 后紧跟中文标点时，WorkBuddy 能否正确解析路径 | `UNVERIFIED` | WB-OPDK 校验器会误判（`OBSERVED`，2026-10-10 本地预检）。编译器规定引用后必须紧跟空白字符（DERIVED） | — |
 
 ## B. 运行环境
 
@@ -46,7 +49,7 @@ last_updated: 2026-10-10
 | B2 | Windows 上执行命令所用的 shell（bash / Git Bash / PowerShell / cmd） | `UNVERIFIED` | — | V-EN-02 |
 | B3 | 用户机器上是否有可用的 `python3` / `python` / `py` / `node` | `UNVERIFIED`（因机器而异） | 必须在运行时探测 | V-EN-01, V-EN-03 |
 | B4 | Skill 运行时的当前工作目录，以及能否在其中写入文件 | `UNVERIFIED` | — | V-EN-05 |
-| B5 | Skill 能否读取自身包内的 references/scripts/templates（Agent 读取，或脚本按相对路径读取） | `UNVERIFIED`（付费状态下尤其不确定） | — | V-PP-04, V-EN-04 |
+| B5 | Skill 能否读取自身包内的 references/scripts/templates（Agent 读取，或脚本按相对路径读取） | `UNVERIFIED`（本地未加密 → T-ENV / T-PRO-L；加密 → T-PRO-M1/M2） | — | V-PP-03/04, V-EN-04 |
 | B6 | 能否检测某个字体是否已安装（只查询，不扫描全盘） | `UNVERIFIED` | — | V-EN-06 |
 | B7 | Agent 能否读取用户上传的图片、PDF、PPT 中的视觉信息 | `UNVERIFIED`（依赖 WorkBuddy 的模型和工具） | — | V-EN-07 |
 
@@ -61,8 +64,9 @@ last_updated: 2026-10-10
 | C5 | H2：第三方 Skill 引导调用 Skill Creator，原样安装已生成的 Skill（不改写内容） | `TO TEST` | — | V-IN-03 |
 | C6 | H3：由用户发出一句指令，触发原生安装指定路径的 Skill | `TO TEST` | — | V-IN-04 |
 | C7 | H4：通过 UI 手动导入 ZIP | `UNVERIFIED`（本地导入入口未确认） | 开放平台上传 ZIP 属于"发布"，与本地安装不同 | V-IN-06 |
-| C8 | H5：直接写入 WorkBuddy 本地 Skill 目录后能被识别 | `TO TEST`（不优先） | — | V-IN-05 |
-| C9 | 同名 Skill 的升级、覆盖行为 | `TO TEST` | — | V-IN-07 |
+| C8 | H5：直接写入 WorkBuddy 本地 Skill 目录 | **不测试、不采用**（NOT APPROVED FOR V1，D-08） | 将来采用需产品负责人单独批准 | — |
+| C9 | 同名 Skill 的升级、覆盖行为 | `TO TEST` | — | V-IN-07（T-INS-UP） |
+| C11 | 安装后的产物与构建包逐字节一致（没有被 Skill Creator 等改写） | `TO TEST` | build-manifest + selfcheck | T-INS-H1..H4 |
 | C10 | 安装后无需重启即可在当前或新会话中生效 | `TO TEST` | — | V-IN-08 |
 
 ## D. 调用行为
@@ -78,6 +82,12 @@ last_updated: 2026-10-10
 
 ## E. 付费与保护
 
+三个概念分开记录：
+
+- **Paid Skill**：销售机制；
+- **Encrypted Skill**：平台的加密选项；
+- **Source Protection**：实际保护效果。
+
 | # | 能力 | 状态 | 证据 | 验证用例 |
 |---|---|---|---|---|
 | E1 | 技能和专家可以设置付费：一次性买断或按月订阅 | `OBSERVED`（开放平台前端文案） | open.workbuddy.cn 页面 i18n 文案（2026-10-10 抓取）："发布付费技能 · 支持一次性买断或按月订阅" | — |
@@ -85,7 +95,9 @@ last_updated: 2026-10-10
 | E3 | 开通收款的条件：已认证、无违规、已有 ≥1 个审核通过的技能或专家 | `OBSERVED`（前端文案） | 同上；产品负责人满足这些条件 | — |
 | E4 | 费用：内测期间平台服务费 1%，微信支付手续费 0.6% | `OBSERVED`（前端文案，可能变化） | 同上 | 提交时复核 |
 | E5 | UI 显示"付费能力必须加密，不可关闭"，以及"一定技术防护但无法完全避免泄漏，且用户不可使用自定义模式调用" | `OBSERVED`（仅 UI 文案） | 同上 | — |
-| E6 | 加密或保护的实际效果，以及在哪一层实现 | `UNVERIFIED` | — | V-PP-01..06 |
+| E6 | **Source Protection**：用户或其他 Agent 能否读取、复制、提取原始实现；保护在哪一层实现 | `UNVERIFIED` | — | V-PP-01/02/06 |
+| E8 | 加密形态下：Agent 读取 references / 脚本执行 / 脚本读取资源 / 资源输出到工作区 / 生成器生成新文件 | `UNVERIFIED` | 决定 D-03 | V-PP-03/04/07/08（T-PRO-M1） |
+| E9 | 开发者账号与普通购买者账号的行为是否一致 | `UNVERIFIED` | — | V-PP-09（T-PRO-M1 vs M2） |
 | E7 | "自定义模式"的含义，以及它对 DesignBuddy 交互的影响 | `UNVERIFIED` | — | V-PP-05 |
 
 ## F. 外部标准
@@ -101,3 +113,4 @@ last_updated: 2026-10-10
 | 日期 | 变更 |
 |---|---|
 | 2026-10-10 | 初版。C1/C2 由产品负责人实测标记为 OBSERVED；E1–E5 来自开放平台前端文案 |
+| 2026-10-10 | R2：拆分 Paid / Encrypted / Source Protection 三个概念；新增 A9、C11、E8、E9；C8（H5）改为不测试、不采用；去掉独立的"TO TEST"等级（并入 UNVERIFIED） |

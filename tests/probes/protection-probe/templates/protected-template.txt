@@ -1,0 +1,2 @@
+DesignBuddy protection probe — bundled template resource.
+Marker: DBP-PRO-TPL-9M2X

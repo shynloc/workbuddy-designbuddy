@@ -198,8 +198,8 @@ DesignBuddy 是一个运行在 WorkBuddy 中的专业 **AI Brand System Builder 
 | ID | 需求 | 优先级 |
 |---|---|---|
 | FR-60 | 安装前展示摘要，并取得用户的明确确认 | P0 |
-| FR-61 | 原生安装交接：H1 → H4 逐级降级；ZIP 作为 fallback | P0 |
-| FR-62 | 安装后的一致性校验 + Runtime Smoke Test | P0 |
+| FR-61 | 原生安装交接：H1 → H4 逐级降级；ZIP 作为 fallback。**不实现 H5**（直接写入 Skill 目录） | P0 |
+| FR-62 | 安装后的一致性校验：用 build-manifest 比对文件列表、内容哈希、版本、关键规则、引用；然后做 Runtime Smoke Test | P0 |
 | FR-63 | 同名 Skill 升级时说明版本变化，并重新确认 | P0 |
 | FR-64 | 备份导出（ZIP + Portable） | P0 |
 
@@ -211,7 +211,8 @@ DesignBuddy 是一个运行在 WorkBuddy 中的专业 **AI Brand System Builder 
 | NFR-02 | 零外部依赖：只用 Python 标准库；禁止默认执行 pip 或 npm 安装 |
 | NFR-03 | Token 预算（目标值，待实测）：Brand Skill 的 SKILL.md ≤ 2k，单个 reference ≤ 1.5k，单次任务 ≤ 8k |
 | NFR-04 | 隐私：原始资料默认不进入 Skill；不向外部服务发送资料；产物中不含绝对路径或密钥 |
-| NFR-05 | 确定性：相同 IR 编译出相同产物 |
+| NFR-05 | 确定性：相同 IR 编译出相同产物。基础模板、组件和生成器都是预先构建好的，运行时**不**由 Agent 现场编写 |
+| NFR-08 | 本地优先：不经产品负责人批准，不引入服务端编译或云端依赖 |
 | NFR-06 | 可恢复：每次 Gate 通过后都保存 IR 快照，可以回滚 |
 | NFR-07 | 证据纪律：平台相关的判断标注 OFFICIAL / OBSERVED / DERIVED / UNVERIFIED |
 
@@ -222,7 +223,7 @@ DesignBuddy 是一个运行在 WorkBuddy 中的专业 **AI Brand System Builder 
 | 形态 | WorkBuddy 技能市场的 **Paid Skill**（买断制） |
 | 价格 | **TBD**。待产品完成度、开发成本、用户体验、Runtime 验证和市场策略明确后再定。平台 UI 文案显示价格须为 1–9999 的整数（OBSERVED，来自前端文案，以提交时实际为准），因此不能定 19.9 |
 | 不可更改项 | 付费方式上架后不可更改（UI 文案 OBSERVED）；改价次数每年有限 |
-| 对外表述 | 只说 "Paid Skill"。保护机制验证之前不说 "Encrypted Skill"（见 PAID_SKILL_PROTECTION_VALIDATION.md） |
+| 对外表述 | 只说 "Paid Skill"。区分三个概念：Paid Skill（销售机制）、Encrypted Skill（平台加密选项）、Source Protection（实际保护效果）。实际保护能力未经测试前，不使用后两种说法（见 PAID_SKILL_PROTECTION_VALIDATION.md） |
 | 免费版 | 不做。产品负责人已有其他免费 Skill |
 | 服务类目（个人主体） | 主类目"工具 → 办公"，辅类目"工具 → 图片处理"；市场分类选"设计"。提交当天需复核官方类目页 |
 | 发布主体 | 已认证的个人开发者，已有审核通过的 Skill 和专家，满足开通收款的前置条件 |

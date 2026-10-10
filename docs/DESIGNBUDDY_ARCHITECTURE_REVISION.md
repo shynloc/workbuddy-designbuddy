@@ -1,13 +1,13 @@
 ---
 title: DesignBuddy Architecture Revision
 doc_type: decision-record
-revision: R1
-status: DRAFT — 待产品负责人确认
+revision: R2
+status: DRAFT — R2 决策已由产品负责人确认；平台相关部分待 Probe 验证
 last_updated: 2026-10-10
 supersedes: 对话中的早期构想（"生成 ZIP 让用户手动安装"、"安装后全局继承"、"付费 Skill 必须加密"等表述）
 ---
 
-# DesignBuddy 架构修订（R1）
+# DesignBuddy 架构修订（R2）
 
 本文是 DesignBuddy 的**架构决策记录**。它把产品负责人 2026-10-10 的补充要求整理为正式约束，并替代此前对话中的初步构想。
 
@@ -15,6 +15,18 @@ supersedes: 对话中的早期构想（"生成 ZIP 让用户手动安装"、"安
 - [`architecture.md`](architecture.md) 回答"具体怎么实现"（文件结构、Schema、脚本接口）。
 - [`PRD.md`](PRD.md) 回答"做什么、给谁、怎样算完成"。
 - 平台事实的证据等级见 [`runtime-capabilities.md`](runtime-capabilities.md)，待验证项见 [`validation-plan.md`](validation-plan.md) 与 [`open-questions.md`](open-questions.md)。
+
+## R2 决策记录（2026-10-10，产品负责人确认）
+
+| 事项 | 决定 | 影响章节 |
+|---|---|---|
+| 付费保护的认知修正 | **ACCEPTED**。严格区分 Paid Skill（销售机制）、Encrypted Skill（平台加密选项）、Source Protection（实际防读取、防复制的效果）三个概念。对外统一称 Paid Skill | §0、§26 |
+| D-01 / D-02：用 JSON 作为唯一事实来源 | **ACCEPTED**，附加三项要求：必须有 `schema_version`；必须实现数据校验（不宣称标准库支持完整的 JSON Schema 校验）；数据模型与导出格式分离 | §3、architecture.md §3 |
+| D-03：完全现场生成 | **NOT APPROVED AS DEFAULT**，改为 **CONDITIONAL FALLBACK / PENDING VALIDATION**。默认架构保持"预置的确定性 Compiler + Brand IR → 构建" | §29、architecture.md §2 |
+| H1–H4 | **APPROVED FOR TESTING** | §16 |
+| H5（直接写入 Skill 目录） | **NOT APPROVED FOR V1**。以后如要采用，必须由产品负责人单独批准 | §14、§16 |
+| 第一轮 Probe Skills | **APPROVED FOR PREPARATION**，见 `tests/probes/` | validation-plan.md |
+| 服务端编译 | 未经批准不得引入。本地优先架构不得改为依赖云服务 | §29 |
 
 ## 0. 知识分级约定
 
@@ -35,7 +47,7 @@ supersedes: 对话中的早期构想（"生成 ZIP 让用户手动安装"、"安
 |---|---|---|
 | 1 | 生成 ZIP，用户自己找目录安装 | 主路径改为**交给 WorkBuddy 原生机制安装**，ZIP 仅作 fallback（§14–16） |
 | 2 | 安装后所有设计任务自动继承品牌 | 改为 **Contextual Brand Runtime**：按语境调用，多品牌时必须消歧（§9–10） |
-| 3 | 付费 Skill 必须加密 | 平台 UI 文案中出现过"付费能力必须加密"，但实际保护效果是 `UNVERIFIED`。对外只说 **Paid Skill**（§26） |
+| 3 | 付费 Skill 必须加密 | 区分三个概念：**Paid Skill**（销售机制，`OBSERVED`）≠ **Encrypted Skill**（平台 UI 中的加密选项，`OBSERVED` 仅限文案）≠ **Source Protection**（实际保护效果，`UNVERIFIED`）。对外只说 Paid Skill（§26） |
 | 4 | 价格 19.9 元 / 19 或 20 元 | 价格 **TBD**，不阻塞架构。平台 UI 文案显示只允许 1–9999 元的整数（`OBSERVED`，来自前端文案） |
 | 5 | 按操作系统分 bash / PowerShell | 改为 **Capability-first** 能力探测（§14、architecture.md §6） |
 | 6 | 各规范文件分别写颜色、字号等数值 | 统一以 **Brand IR** 为唯一事实来源，所有文件都从它派生（§3） |
@@ -138,20 +150,44 @@ Sources → Extraction → Normalization → Brand IR → Validation → Human A
    - 有版本号；
    - 能校验：有 Schema 和校验脚本。
 
-### 存储格式（决策 D-01）
+### 存储格式（决策 D-01 / D-02，ACCEPTED）
 
-- **规范存储格式是 JSON**（`brand-ir.json`）。
-- 原因：Capability-first 要求核心路径只用 Python 标准库，而标准库能解析 JSON、不能解析 YAML。
-- YAML 只作为**只写的导出视图**（`brand-ir.yaml`，放在 Portable 包中，便于阅读），不作为输入。
-- 这与需求中"建议 JSON/YAML"一致，取了其中可校验的那一种。
+- **Brand IR 和 Project Metadata 统一用 JSON 作为机器可读的唯一事实来源**（`brand-ir.json`、`project.json`）。
+- 理由：
+  - Python 标准库直接支持；
+  - 跨平台稳定，容易解析；
+  - 适合结构化校验和版本管理，方便扩展。
+- **必须包含 `schema_version`**（SemVer），位于根级别。它与 Brand Design System 的版本是两个独立的版本号。
+- **必须实现数据校验**：
+  - V1 用标准库自己实现必要的检查：必填字段、类型、枚举值、交叉引用、业务规则（详见 architecture.md §3.6）。
+  - **Python 标准库并不原生支持完整的 JSON Schema 校验**，我们也不对外宣称"完整 JSON Schema 校验"。
+  - 同时附带 `brand-ir.schema.json`，供有 `jsonschema` 等外部工具的开发者使用。它不是运行时依赖。
+- **数据模型与导出格式分离**：IR 只描述品牌和设计系统本身，不包含任何导出格式的细节。导出格式由 Exporter 负责：
+
+  ```
+  Brand IR (JSON) → Exporters ├── WorkBuddy Brand Skill
+                               ├── DESIGN.md
+                               ├── Design Tokens (DTCG JSON)
+                               ├── CSS
+                               ├── Office Themes
+                               └── Portable Bundle
+  ```
+
+- YAML（`brand-ir.yaml`）只作为**可选的导出格式**，不作为输入，也不是运行时的必需依赖。
 
 ### 顶层结构
 
 ```
-metadata · brand · voice · identity · colors · typography · spacing · radius · borders
-· shadows · grid · layout · imagery · photography · illustration · iconography · motion
-· accessibility · document · presentation · spreadsheet · web · poster · social
-· assets · licenses · rules · provenance_index · version
+schema_version
+metadata
+brand           ─ name · aliases · industry · audience · positioning · personality · values · voice · identity(logo…)
+design_system   ─ colors · typography · spacing · radius · borders · shadows · grid · layout · imagery
+                  · photography · illustration · iconography · motion · accessibility
+applications    ─ document · presentation · spreadsheet · web · poster · social
+rules           ─ MUST / SHOULD / AVOID / NEVER
+assets · licenses  ─ 指向 manifest
+provenance      ─ 统计与待审核索引
+version         ─ system / skill / changelog
 ```
 
 完整的字段定义和示例见 [`architecture.md` §3](architecture.md#3-brand-ir-规范)。
@@ -470,7 +506,7 @@ Generate → Validate package → Preview → Explain（最终摘要）→ Expli
 
 - 必须得到明确确认（"是 / 安装"）才执行，**不得静默安装**。
 - 不在后台修改用户的 Skill 环境。
-- **不优先**直接写入 WorkBuddy 内部的 Skill 目录。只有在验证可行且用户明确同意的前提下，才作为最后手段，并单独记录（V-IN-05）。
+- **V1 不采用 H5**（直接写入 WorkBuddy 内部的 Skill 目录）。即使技术上可行，也涉及用户授权、路径兼容、Skill 注册机制、升级机制、软件版本变化、意外覆盖现有 Skill 等问题。除非 H1–H4 全部无法满足需求，且能证明 H5 安全、可逆、可维护，否则不实现。**即便将来采用，也必须经产品负责人单独批准。**
 - 同名 Skill 已存在时，先说明"这是升级：1.0.0 → 1.1.0，变更如下……"，再确认。
 
 ### 安装后
@@ -492,7 +528,7 @@ Generate → Validate package → Preview → Explain（最终摘要）→ Expli
 
 ## 16. Third-party Install Handoff — Validation Plan
 
-### 候选交接方式（按优先级排列，全部为 `TO TEST`）
+### 候选交接方式（按优先级排列；H1–H4 已批准测试，H5 不进入 V1）
 
 | 方式 | 描述 | 优点 | 风险 |
 |---|---|---|---|
@@ -500,18 +536,26 @@ Generate → Validate package → Preview → Explain（最终摘要）→ Expli
 | H2 Skill 串联 | DesignBuddy 指示 Agent 调用内置 Skill Creator，并传入"从路径 X 安装已生成的 Skill"的指令 | 复用已经 OBSERVED 的路径 | Skill Creator 可能会"重写"而不是"原样安装" → 必须做内容一致性校验 |
 | H3 用户一句话触发 | DesignBuddy 给出一句可以直接复制的指令（例如"请安装位于 X 的 Skill"），由用户发出，触发原生安装 | 安装动作由用户发起，天然满足确认要求 | 多一步操作 |
 | H4 ZIP 手动导入 | 生成符合规范的 ZIP，按指引通过 WorkBuddy UI 导入 | 一定可用 | 体验最差，**仅作 fallback** |
-| H5 直接写目录 | 写入 WorkBuddy 本地的 Skill 目录 | — | **不优先**，只在验证可行并取得用户同意后，作为最后手段 |
+| H5 直接写目录 | 写入 WorkBuddy 本地的 Skill 目录 | — | **NOT APPROVED FOR V1**，不实现，也不作为测试步骤执行；将来如要采用，需单独批准 |
 
 ### 运行时选择逻辑
 
-按 H1 → H2 → H3 → H4 依次探测并降级。实际使用了哪种方式，记录到 `state.json` 和 Source Report。
+按 H1 → H2 → H3 → H4 依次探测并降级。不存在 H5 分支。实际使用了哪种方式，记录到 `state.json` 和 Source Report。
 
 ### 安装后的一致性校验（无论用哪种方式）
 
-1. 确认安装后的 Skill 名称和版本与导出物一致；
-2. 用 Smoke Test 抽查一条 MUST 规则的具体数值（例如主色 HEX），确认没有被 Skill Creator 改写；
-3. 发出品牌明确的触发句，确认命中；
-4. 发出无品牌的泛化请求，确认不会误套品牌（或至少会先询问）。
+只看"安装成功"的提示是不够的。必须核对实际安装的产物与原始构建包是否一致：
+
+1. **文件列表与内容**：
+   - 构建时生成 `build-manifest`，记录每个文件的 SHA-256 和 `build_id`；
+   - 安装后由 Brand Skill 自带的自检脚本逐一比对；
+   - 结果区分 MATCH / MISMATCH / 只有换行符不同 / 缺失 / 多出。
+2. **版本**：frontmatter 中的版本、manifest 中的版本、`build_id` 三者一致。
+3. **关键规则**：抽查 MUST/NEVER 规则的具体数值（例如主色 HEX），确认没有被 Skill Creator 改写或重新生成。
+4. **引用**：所有 `@references/` 路径都能读取。
+5. **触发**：发出品牌明确的触发句，确认命中；发出无品牌的泛化请求，确认不会误套品牌（或至少会先询问）。
+
+如果没有可用的 Python，由 Agent 核对第 2–5 项，结果标注 UNVALIDATED。这套机制已在 `tests/probes/installation-probe` 中实现了最小原型。
 
 详细用例见 validation-plan V-IN-*、V-RT-*。
 
@@ -668,7 +712,7 @@ Preview 是正式的 Release Gate（G5）。打包前至少生成以下三个样
 ### 所有导出物都写入的元数据
 
 ```
-generated_by: DesignBuddy x.y.z · generated_at · brand_ir_version · ir_schema_version
+generated_by: DesignBuddy x.y.z · generated_at · build_id · system_version · schema_version
 ```
 
 ### 变更记录与迁移
@@ -710,13 +754,24 @@ source · type · extracted_items · contains_sensitive_data · included_in_fina
 | 二进制 Office 模板随 Skill 携带与使用 | TO TEST |
 | 指定字体是否已安装的检测 | TO TEST |
 | scripts 在 Win/Mac 上的可用解释器 | TO TEST |
-| 付费 Skill 的内容保护 | TO TEST（UI 文案已 OBSERVED，效果 UNVERIFIED） |
-| 加密 Skill 能否读取或复制自身 templates/scripts | TO TEST（关键，见 §29） |
+| Paid Skill（付费销售机制） | OBSERVED（UI 文案） |
+| Encrypted Skill（平台加密选项） | OBSERVED（仅 UI 文案） |
+| Source Protection（实际保护效果） | UNVERIFIED → T-PRO-M1/M2 |
+| 加密后：references 可读 / 脚本可执行 / 资源可读 / 资源可输出 / 生成器可用 | TO TEST（T-PRO，关键，见 §29） |
+| 开发者账号与购买者账号的行为是否一致 | TO TEST（T-PRO-M1 vs M2） |
 | Portable DESIGN.md | DERIVED |
 
 ## 26. Paid Skill Protection Validation
 
-**付费和源码保护是两个概念。** 详细验证见 [`PAID_SKILL_PROTECTION_VALIDATION.md`](PAID_SKILL_PROTECTION_VALIDATION.md)。
+三个概念必须严格区分，不能混为一谈：
+
+| 概念 | 含义 | 当前证据 |
+|---|---|---|
+| **Paid Skill** | 付费销售机制（买断 / 订阅、定价、收款） | `OBSERVED`（开放平台 UI 文案） |
+| **Encrypted Skill** | 平台提供的"加密"选项。UI 文案显示付费时强制开启 | `OBSERVED`（仅 UI 文案） |
+| **Source Protection** | 实际能否阻止用户或其他 Agent 读取、复制、提取原始实现 | `UNVERIFIED` |
+
+详细验证见 [`PAID_SKILL_PROTECTION_VALIDATION.md`](PAID_SKILL_PROTECTION_VALIDATION.md)。
 
 - 已观察到：开放平台前端文案包含"已开启（付费能力必须加密，不可关闭）"，以及"会对资产内容进行一定技术防护，但无法完全避免泄漏，且用户不可使用自定义模式调用"。这只能证明 UI 存在这个开关，**不能证明**保护在哪一层实现、效果如何。
 - 在验证完成之前：对外只说 **Paid Skill**，不写 Encrypted Skill。
@@ -766,9 +821,44 @@ Office 二进制模板（.potx/.dotx/.xltx）。验证不通过时降级，不�
 完整列表与处理方式见 [`open-questions.md`](open-questions.md)。最关键的几项：
 
 1. **第三方 Skill 交接原生安装的具体机制**：H1–H5 中哪些可用。
-2. **付费 Skill 在"加密"状态下，Agent 能否读取或复制自身的 templates/、scripts/**。
-   - 这直接影响编译器的实现方式：如果不能复制文件，Brand Skill 的脚本和模板只能由编译脚本"现场生成"，或由 Agent 写出，而不是从 DesignBuddy 包里拷贝。
-   - **架构决策 D-03**：编译器的设计不依赖"复制自身文件"，所有产出都由生成器以代码或数据的形式写出。
+2. **加密状态下，DesignBuddy 自带的编译能力还能不能用**。
+
+   **D-03 的状态是 CONDITIONAL FALLBACK / PENDING VALIDATION，不是默认架构。**
+
+   **默认架构（不变）**：
+
+   ```
+   DesignBuddy 内置的编译能力（预先写好的生成器、规则、数据模型、校验器、模板体系、标准组件、导出逻辑）
+     + Brand IR
+     → Deterministic Build
+     → Brand Skill Package
+   ```
+
+   需要区分两件事：
+
+   | | 性质 | 结论 |
+   |---|---|---|
+   | 运行时**生成成品文件**（品牌专属的 SKILL.md、Tokens、规范、CSS、DESIGN.md、配置） | DesignBuddy 的正常职责，由确定性生成器根据 IR 产出 | 默认如此 |
+   | 运行时让 Agent **重新编写我们的基础模板、组件、生成器** | 慢、耗 Token、结果不可复现，会把产品变成 vibe coding | **不作为默认架构** |
+
+   **加密状态下需要验证的能力**（tests/probes/protection-probe）：
+   1. Agent 能否读取 references；
+   2. 能否执行自带脚本；
+   3. 脚本能否读取所需的模板和资源；
+   4. 能否把模板内容输出到用户工作目录；
+   5. 能否用生成器直接生成新文件，而不复制模板原文件；
+   6. 以上行为在开发者账号和普通购买者账号中是否一致。
+
+   **关键判断**：读不到原始源码，不等于不能执行受保护的生成器。只要生成器能执行，并能向指定目录输出产物，完整的 Compiler 架构就可以保留。
+
+   **按验证结果决定调整方式**：
+
+   | 验证结果 | 架构调整 |
+   |---|---|
+   | 脚本能执行，且能读取自身资源 | 保持默认架构 |
+   | 脚本能执行，但不能读取自身资源 | 把模板和数据内嵌进生成器代码（仍是预置的确定性生成器，不是现场编写） |
+   | 脚本不能执行 | 评估其他方案。服务端编译**必须经产品负责人批准**；未经批准，不得把本地优先架构改为依赖云服务 |
+   | 以上都不可行 | 才考虑 Agent 现场生成，并作为降级方案标注 UNVALIDATED |
 3. **"用户不可使用自定义模式调用"的确切含义**，以及它对 DesignBuddy 交互的影响。
 4. WorkBuddy 在 Windows / macOS 上执行命令所用的 shell 和可用解释器。
 5. 第三方 Skill 是否有权限读写用户的工作目录、默认工作目录在哪里。
@@ -781,7 +871,7 @@ Office 二进制模板（.potx/.dotx/.xltx）。验证不通过时降级，不�
 | 风险 | 影响 | 缓解 |
 |---|---|---|
 | 原生安装交接不可用 | 主路径体验降级 | H1→H4 逐级降级；ZIP + 图文指引兜底 |
-| 加密导致 DesignBuddy 无法复制自身资源 | 编译失败 | D-03：生成器写出所有产出，不做文件复制 |
+| 加密导致自带的生成器或资源不可用 | 编译能力受损 | 先测试（T-PRO）；按 §29 的结果逐级调整；Agent 现场生成只作为最后的降级方案（D-03 CONDITIONAL） |
 | 自动调用误触发或漏触发 | 品牌被乱套，或该用时没用 | 高质量 description、消歧规则、多品牌测试 |
 | Skill Creator 在安装时改写内容 | 规则失真 | 安装后做一致性校验和 Smoke Test |
 | AI 推断被当成事实 | 品牌错误 | Provenance 机制、Gate 优先审核 INFERRED/GENERATED 项 |

@@ -1,6 +1,6 @@
 ---
 title: DesignBuddy Technical Architecture
-status: DRAFT (R1) — 待 validation-plan 中阻塞项验证后冻结
+status: DRAFT (R2) — D-01/D-02 已接受；D-03 待验证；平台相关部分待 Probe 结果后冻结
 last_updated: 2026-10-10
 related: DESIGNBUDDY_ARCHITECTURE_REVISION.md · PRD.md · runtime-capabilities.md
 ---
@@ -60,24 +60,31 @@ designbuddy/
 │   ├── font-licenses.md             # 可商用字体知识库（每条都有来源 URL 和 verified_at）
 │   ├── brand-ir-spec.md             # 给 Agent 看的 IR 字段说明（Schema 的人类可读版）
 │   ├── compiler-spec.md             # Brand Skill 与 Portable 的输出规范
-│   ├── install-handoff.md           # H1–H5 探测与交接、确认话术、Smoke Test
+│   ├── install-handoff.md           # H1–H4 探测与交接、确认话术、安装后比对（H5 不实现）
 │   └── capability-fallback.md       # 脚本不可用时 Agent 的手工步骤与 UNVALIDATED 标注
 ├── scripts/
 │   ├── db.py                        # 统一入口：python db.py <command> [...]
 │   └── designbuddy/                 # 标准库实现的模块（见 §7）
-└── templates/                       # 只放 Agent 需要直接阅读的骨架（生成器自带数据，见 D-03）
+└── templates/                       # 预置模板体系与标准组件（Web/海报/社交/Office 主题骨架、tokens 模板），由生成器渲染
 ```
 
-> **D-03（关键）**：编译器**不依赖"复制 DesignBuddy 自身文件"**来产出 Brand Skill。Brand Skill 中的脚本、模板、references 都由生成器从 IR 加上内嵌数据**写出**。
+> **默认架构：预置的确定性 Compiler。**
 >
-> 原因：付费或加密状态下，Agent 能否读取、复制自身包内的文件是未知的（V-PP-04）。如果脚本不可用，就由 Agent 按 `compiler-spec.md` 手工写出，并标注 `UNVALIDATED`。
+> 生成器、规则、数据模型、校验器、模板体系、标准组件、导出逻辑，全部在开发阶段完成并打包进 DesignBuddy。用户使用时，由生成器根据 Brand IR **确定性地**产出品牌专属文件。
+>
+> 产出的方式是"渲染"：读取模板，再用 IR 中的值填充，然后写出新文件。这与"把模板原样复制给用户"是两回事。
+>
+> **D-03（CONDITIONAL FALLBACK / PENDING VALIDATION）**：
+> - 只有在 T-PRO 证明加密形态下脚本不能执行、或资源不可用时，才逐级降级（降级顺序见 *Revision* §29）。
+> - 由 Agent 现场编写模板或生成器，是最后一级降级，**不是默认路径**。
+> - 服务端编译需要产品负责人另行批准。
 
 ## 3. Brand IR 规范
 
 ### 3.1 文件与格式
 
-- 规范格式：`brand-ir/brand-ir.json`，UTF-8 编码。（决策 D-01：标准库可解析。）
-- Schema：`ir_schema_version` 使用 SemVer，与 Brand Design System 的版本相互独立。
+- 规范格式：`brand-ir/brand-ir.json`，UTF-8 编码（D-01，ACCEPTED）。
+- 根级别必须有 `schema_version`（SemVer），与 Brand Design System 的版本（`metadata.system_version`）相互独立。
 - 历史快照：每次 Gate 通过后写入 `brand-ir/history/brand-ir.{system_version}.{timestamp}.json`。
 - YAML：仅作为导出视图（`brand-ir.yaml`），不作为输入。
 
@@ -114,10 +121,12 @@ designbuddy/
 
 ### 3.4 顶层结构（V1）
 
+数据模型只描述品牌本身，不包含任何导出格式的细节。
+
 ```jsonc
 {
+  "schema_version": "1.0.0",              // IR 数据模型的版本（必须有）
   "metadata": {
-    "ir_schema_version": "1.0.0",
     "system_version": "1.0.0",           // Brand Design System Version
     "generated_by": "DesignBuddy 1.0.0",
     "created_at": "...", "updated_at": "...",
@@ -127,13 +136,14 @@ designbuddy/
   "brand": {
     "name": Fact, "name_en": Fact, "aliases": Fact<string[]>, "slug": "acks",
     "industry": Fact, "audience": Fact, "positioning": Fact,
-    "personality": Fact<string[]>, "values": Fact<string[]>, "anti_personality": Fact<string[]>
+    "personality": Fact<string[]>, "values": Fact<string[]>, "anti_personality": Fact<string[]>,
+    "voice": { "tone": Fact, "preferred_language": Fact<string[]>, "avoid_language": Fact<string[]>, "examples": Fact },
+    "identity": {
+      "logo": { "primary": AssetRef, "variants": [AssetRef], "clear_space": Fact, "minimum_size": Fact,
+                "backgrounds_allowed": Fact, "misuse": [RuleRef] }
+    }
   },
-  "voice": { "tone": Fact, "preferred_language": Fact<string[]>, "avoid_language": Fact<string[]>, "examples": Fact },
-  "identity": {
-    "logo": { "primary": AssetRef, "variants": [AssetRef], "clear_space": Fact, "minimum_size": Fact,
-              "backgrounds_allowed": Fact, "misuse": [RuleRef] }
-  },
+  "design_system": {
   "colors": {
     "primary": [ColorToken], "secondary": [ColorToken], "accent": [ColorToken],
     "neutral": [ColorToken], "semantic": { "success": ColorToken, "warning": ..., "error": ..., "info": ... },
@@ -150,12 +160,13 @@ designbuddy/
   "grid": { "web": Fact, "print": Fact, "slide": Fact },
   "layout": Fact,
   "imagery": Fact, "photography": Fact, "illustration": Fact, "iconography": Fact, "motion": Fact,
-  "accessibility": { "target": "WCAG 2.x AA", "pairs": [ContrastResult], "overrides": [Override] },
-  "document": Fact, "presentation": Fact, "spreadsheet": Fact, "web": Fact, "poster": Fact, "social": Fact,
+  "accessibility": { "target": "WCAG 2.x AA", "pairs": [ContrastResult], "overrides": [Override] }
+  },                                      // end design_system
+  "applications": { "document": Fact, "presentation": Fact, "spreadsheet": Fact, "web": Fact, "poster": Fact, "social": Fact },
+  "rules": [Rule],
   "assets": "→ asset-manifest.json",
   "licenses": "→ font-manifest.json + asset-manifest.json",
-  "rules": [Rule],
-  "provenance_index": { "counts": {...}, "pending": [<json-pointer>] },
+  "provenance": { "counts": {...}, "pending": [<json-pointer>] },
   "version": { "system": "1.0.0", "skill": "1.0.0", "changelog": [...] }
 }
 ```
@@ -187,7 +198,11 @@ designbuddy/
 | 放行 | 存在 `review = pending` 的 MUST/NEVER 规则 → 不能导出；核心对比度组合 FAIL 且没有 override → 不能导出 |
 
 - 输出 JSON 报告，包含 `errors[]`、`warnings[]`、`pending[]`。
-- Schema 用一个最小的内置校验器实现，不依赖 `jsonschema` 库。同时提供 `schemas/brand-ir.schema.json` 供外部工具使用。
+- **实现边界**：
+  - V1 用标准库自己实现上表中的检查：必填字段、类型、枚举值、交叉引用、业务规则。
+  - Python 标准库**不原生支持** JSON Schema 校验，我们也**不宣称**实现了完整的 JSON Schema 规范。
+  - 另外附带 `schemas/brand-ir.schema.json`，供有 `jsonschema` 等外部工具的开发者使用。它不是运行时依赖。
+- `schema_version` 与当前 DesignBuddy 支持的版本不一致时，先执行迁移（`ws migrate`），再校验。
 
 ## 4. Workspace 与状态机
 
@@ -245,7 +260,7 @@ brand-ir.json ──validate──▶ ┬─ skill exporter    ─▶ exports/wo
 
 | Exporter | 产出 | 说明 |
 |---|---|---|
-| `skill` | SKILL.md, references/*.md, scripts/*.py, templates/** | 见 §8；每个文件头写入生成元数据 |
+| `skill` | SKILL.md, references/*.md, scripts/*.py, templates/**, templates/build-manifest.json | 见 §8；每个文件头写入生成元数据；manifest 记录每个文件的 SHA-256 和 build_id，供安装后比对 |
 | `tokens` | tokens.json (W3C DTCG), tokens.css | DTCG：`$value` / `$type` / `$description`；CSS：`--brand-*` 变量 |
 | `designmd` | DESIGN.md | YAML frontmatter（tokens）+ Markdown 说明；只用于 Portable |
 | `office` | office-theme.xml；.potx / .dotx / .xltx（Advanced） | 用 zipfile 写 OOXML；失败不阻塞 |
@@ -255,7 +270,8 @@ brand-ir.json ──validate──▶ ┬─ skill exporter    ─▶ exports/wo
 
 ### 编译要求
 
-- **确定性**：同一份 IR 加同一个 DesignBuddy 版本，输出应逐字节一致（时间戳除外）。
+- **确定性**：同一份 IR 加同一个 DesignBuddy 版本，输出应逐字节一致（时间戳和 build_id 除外）。写文件时统一使用 UTF-8 和 LF 换行符。
+- **引用写法**：`@references/x.md` 后面必须紧跟空白字符或行尾。WB-OPDK 的校验器会把紧跟其后的中文标点误判为路径的一部分；WorkBuddy 自身的解析器是否有同样问题尚未验证。
 - **lint**：编译完成后跑 `db.py package lint`，检查以下内容：
   - 结构（只允许官方的三个子目录）；
   - frontmatter 必填字段；
@@ -398,16 +414,21 @@ disable-model-invocation: false
 - `install-handoff.md` 规定探测顺序和话术；
 - `install verify` 负责一致性比对，包括：Skill 名、版本、一条 MUST 规则的数值、触发句、反例句。
 
-H1–H5 的可行性全部依赖 V-IN-* 的验证结果。在验证完成前，**代码中不写死任何一种安装方式**，只按探测结果选择。
+- H1–H4 的可行性全部依赖 T-INS 的验证结果。在验证完成前，**代码中不写死任何一种安装方式**，只按探测结果选择。
+- **H5 不实现**（NOT APPROVED FOR V1）。
+- 安装后的一致性比对使用 `templates/build-manifest.json` 和 Brand Skill 自带的 `selfcheck`。原型见 `tests/probes/installation-probe`。
 
 ## 13. 决策日志
 
 | ID | 决策 | 理由 | 状态 |
 |---|---|---|---|
-| D-01 | Brand IR 的规范格式是 JSON，YAML 只做导出视图 | 标准库能解析 JSON；需求允许 JSON/YAML | 提议 |
-| D-02 | Workspace 元数据使用 `project.json`（需求原文写的是 project.yaml） | 同 D-01，脚本需要能读取 | 提议，待确认 |
-| D-03 | 编译器通过"生成"产出所有文件，不复制自身包内文件 | 加密状态下自身文件可能不可读（V-PP-04） | 提议 |
+| D-01 | Brand IR 用 JSON 作为唯一事实来源；必须有 `schema_version`；自己实现校验；YAML 只作可选导出 | 标准库支持；跨平台；可校验 | **ACCEPTED** 2026-10-10 |
+| D-02 | Project Metadata 用 `project.json` | 同 D-01 | **ACCEPTED** 2026-10-10 |
+| D-03 | 由 Agent 现场生成全部文件 | 加密状态下可能不可用的应对措施 | **CONDITIONAL FALLBACK / PENDING VALIDATION**；默认是预置的确定性 Compiler |
 | D-04 | V1 的脚本只做 Python 版；Node 只做对比度和 IR 校验两个最小功能 | 控制开发量，同时保证 QA 不被跳过 | 提议 |
 | D-05 | Brand Skill 根目录只保留官方结构；CHANGELOG 放进 references/ | 保守遵循官方规范（V-PK-02） | 提议 |
 | D-06 | Preview 统一用 HTML，不内嵌外部 CDN | 跨平台、离线可用、风险最低 | 提议 |
 | D-07 | Brand Skill 不维护"已安装品牌清单"，消歧只依据品牌线索 | 跨 Skill 可见性未知 | 提议 |
+| D-08 | H5（直接写入 WorkBuddy Skill 目录）不进入 V1 | 授权、兼容、注册、升级、覆盖风险 | **DECIDED** 2026-10-10；将来采用需单独批准 |
+| D-09 | 安装后必须用 build-manifest 比对文件列表、内容、版本、关键规则、引用 | "安装成功"提示不代表内容一致 | **DECIDED** 2026-10-10 |
+| D-10 | 不经批准不引入服务端编译 | 本地优先，保护用户品牌资料 | **DECIDED** 2026-10-10 |

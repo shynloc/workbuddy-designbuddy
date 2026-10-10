@@ -1,0 +1,3 @@
+DesignBuddy environment probe template file.
+Marker: DBP-ENV-TPL-8V3N
+This file is used to test whether scripts can read resources inside their own skill package.

@@ -18,7 +18,7 @@ last_updated: 2026-10-10
 | ID | 问题 | 级别 | 影响 | 如何解决 | 结论 |
 |---|---|---|---|---|---|
 | Q-01 | DesignBuddy 作为第三方 Skill，怎样把已生成的 Brand Skill 交给原生机制安装？H1–H5 中哪些可用？ | Blocker | 安装主路径 | V-IN-01..08 实测 | — |
-| Q-02 | 付费或加密状态下，Agent 能否读取自身的 references、scripts、templates？脚本能否执行？ | Blocker | 编译器实现方式（D-03 已按最坏情况设计）；DesignBuddy 能否运行 | V-PP-03/04 | — |
+| Q-02 | 加密状态下：Agent 能否读取 references？脚本能否执行？脚本能否读取资源、输出文件、运行生成器？开发者与购买者是否一致？ | Blocker | 决定是否保留默认 Compiler 架构（D-03 是 CONDITIONAL） | T-PRO-L / M1 / M2 | — |
 | Q-03 | "用户不可使用自定义模式调用"具体指什么？对 DesignBuddy 有什么限制？ | Blocker | 交互与触发方式 | V-PP-05；必要时咨询官方 | — |
 | Q-04 | Windows 上 WorkBuddy 执行命令用什么 shell？常见的 Python 状态是什么（未安装 / Store 占位程序 / 已安装）？ | High | 能力分级的实际分布 | V-EN-01..03，在多台机器上采样 | — |
 | Q-05 | Skill 运行时的工作目录在哪里？能否写入？用户希望 Workspace 放在哪里？ | High | Workspace 位置 | V-EN-05 | — |
@@ -34,7 +34,7 @@ last_updated: 2026-10-10
 | ID | 问题 | 当前提议 | 结论 |
 |---|---|---|---|
 | P-01 | 定价 | TBD（必须是整数，见 PRD §9） | — |
-| P-02 | D-01/D-02：Brand IR 和项目元数据用 JSON 存储（需求原文写的是 project.yaml），YAML 只做导出视图 | 采用 JSON | — |
+| P-10 | 是否批准发布付费保护测试包（PRO-M1），以及用另一个账号购买测试（PRO-M2）？ | 待批准 | — |
 | P-03 | Workspace 的默认位置：当前工作目录下的 `designbuddy-workspace/`，还是每次询问？ | 默认当前工作目录，首次使用时告知用户并允许修改 | — |
 | P-04 | 字体许可知识库的覆盖范围（首发收录多少款中英文可商用字体）以及复核周期 | 首发约 20–30 款，每季度复核 | — |
 | P-05 | Visual Direction 原型库的首发数量 | 8–12 个原型，每次挑选 2–3 个呈现 | — |
@@ -50,3 +50,8 @@ last_updated: 2026-10-10
 | C-01 | WorkBuddy 是否支持在对话内生成并安装 Skill？ | 支持（OBSERVED，产品负责人实测） | 2026-10 |
 | C-02 | 是否做免费版？ | 不做 | 2026-10 |
 | C-03 | V1 是否包含全部应用模块？ | 包含；Office 二进制模板为 Advanced，可降级 | 2026-10 |
+| C-04 | D-01 / D-02：用 JSON 作为唯一事实来源？ | ACCEPTED；必须有 schema_version；自己实现校验；YAML 可选导出 | 2026-10-10 |
+| C-05 | D-03：完全现场生成？ | 不作为默认；CONDITIONAL FALLBACK / PENDING VALIDATION | 2026-10-10 |
+| C-06 | H5 是否进入 V1？ | 不进入；将来采用需单独批准 | 2026-10-10 |
+| C-07 | 对外如何称呼？ | Paid Skill；区分 Encrypted Skill 与 Source Protection | 2026-10-10 |
+| C-08 | 能否引入服务端编译？ | 未经批准不得引入 | 2026-10-10 |
