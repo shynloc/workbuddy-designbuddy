@@ -120,8 +120,12 @@ last_updated: 2026-10-10
 | G4 | 安装时平台在 Skill 根目录写入 `_user_meta.json` | `OBSERVED` | PKG-005 证据 |
 | G5 | 平台工具 `search_and_install_skills` 只能按名称安装技能市场中的 Skill，不接受本地 ZIP 或目录 → H1 对本地包不适用 | `OBSERVED` | INS-001 |
 | G6 | 第三方 Skill 可以读取自身的 templates、执行自身脚本、向用户项目目录写文件（未加密形态） | `OBSERVED（未加密）` | PKG-007、PP-001、ENV-003/004 |
-| G7 | 从本地 ZIP 安装的 Brand Skill 内容逐字节保持不变（selfcheck MATCH，27 个文件） | `OBSERVED`；安装执行者待澄清（FIX-03） | INS-002/005 |
+| G7 | ~~从本地 ZIP 安装的 Brand Skill 内容逐字节保持不变~~ | **作废**：第 2 轮证明 skill-creator 没有安装器，所以 v0.1.0 的 H2 安装很可能是 Agent 自己写入的（H5），不能作为平台能力的证据 | qa/history/FIX_REPORT-v0.1.1.md 与 qa/FIX_REPORT.md 第 4 节 |
 | G8 | DesignBuddy 编译器在 Windows 和 Linux 上的产物逐文件一致 | `OBSERVED` | FIX_REPORT §1 |
+| G11 | 内置 `skill-creator` 只提供创建和打包引导（init_skill.py / package_skill.py），没有安装执行器 | `OBSERVED（5.7.7/Win）` | INS-002（qa-20261011-025430-7c19） |
+| G12 | 用户在对话中发送带路径的安装句，会被转给 `marketplace-skill-installer` → `search_and_install_skills`（只支持市场），无法安装本地 ZIP | `OBSERVED（5.7.7/Win）` | INS-003 |
+| G13 | 平台能把本地 ZIP 装为 Skill（designbuddy-qa 本身被装上，平台写入了 `_user_meta.json`）；具体入口（附件 / UI 导入）待记录 | `OBSERVED`（结果）/ `UNVERIFIED`（入口） | PKG-008、INS-007（待测） |
+| G14 | WorkBuddy 版本可以从安装目录下的 `resources/install-manifest.json`（appVersion）读取 | `OBSERVED（Win）` | ENV-007 |
 | G9 | 付费加密形态 | `UNVERIFIED` | PP-002/003 BLOCKED |
 | G10 | macOS | `UNVERIFIED` | 未测 |
 
@@ -130,5 +134,6 @@ last_updated: 2026-10-10
 | 日期 | 变更 |
 |---|---|
 | 2026-10-10 | 初版。C1/C2 由产品负责人实测标记为 OBSERVED；E1–E5 来自开放平台前端文案 |
+| 2026-10-11 | 第 2 轮真机：新增 G11~G14；G7 作废（v0.1.0 的 H2 很可能是 H5） |
 | 2026-10-11 | 新增 G 节：v0.1.0 QA 在 Windows / WorkBuddy 5.7.7.0 上的真机观察 |
 | 2026-10-10 | R2：拆分 Paid / Encrypted / Source Protection 三个概念；新增 A9、C11、E8、E9；C8（H5）改为不测试、不采用；去掉独立的"TO TEST"等级（并入 UNVERIFIED） |
