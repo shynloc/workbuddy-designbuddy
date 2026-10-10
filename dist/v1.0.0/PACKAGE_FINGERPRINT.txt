@@ -1,0 +1,3 @@
+designbuddy 1.0.0
+zip sha256              e3bea5a57617095ad95f109b3a905bb1ae1a33a6ee0c77652fb50f78464c557f
+package-manifest sha256 23b27cdb4eec617ca0ca33b386f2e34cea90f651c01b12a562c76af62394cdd9

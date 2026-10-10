@@ -43,7 +43,8 @@
 | `gate --workspace D --gate Gn --decision KEEP\|CHANGE\|REJECT [--set k=v ...]` | 执行 Gate 决策 |
 | `validate --workspace D [--release]` | 校验 IR |
 | `preview --workspace D` | 生成离线 Preview，并做 QA |
-| `build --workspace D [--force]` | 编译全部产物。已存在不同版本时拒绝覆盖，除非加 `--force`（需用户同意） |
+| `build --workspace D [--force] [--deliver [--to DIR]]` | 编译全部产物。已存在不同版本时拒绝覆盖，除非加 `--force`（需用户同意）；加 `--deliver` 时构建后直接交付 |
+| `deliver --workspace D [--to DIR]` | 把交付包复制到 `<下载>/DesignBuddy/<品牌>/`（或 `--to` 指定的目录）。不覆盖已有文件，并附带安装说明 |
 | `run-all --out D` | QA RUN ALL |
 | `record ...` | 回填 Agent 或人工用例 |
 | `selftest` | 核对本 Skill 是否与发布构建一致 |

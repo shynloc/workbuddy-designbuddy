@@ -126,6 +126,7 @@ last_updated: 2026-10-10
 | G12 | 用户在对话中发送带路径的安装句，会被转给 `marketplace-skill-installer` → `search_and_install_skills`（只支持市场），无法安装本地 ZIP | `OBSERVED（5.7.7/Win）` | INS-003 |
 | G13 | 平台能把本地 ZIP 装为 Skill（designbuddy-qa 本身被装上，平台写入了 `_user_meta.json`）；具体入口（附件 / UI 导入）待记录 | `OBSERVED`（结果）/ `UNVERIFIED`（入口） | PKG-008、INS-007（待测） |
 | G14 | WorkBuddy 版本可以从安装目录下的 `resources/install-manifest.json`（appVersion）读取 | `OBSERVED（Win）` | ENV-007 |
+| G15 | 客户端有专门的技能导入入口，可以从本地上传 Skill ZIP 并安装（H4） | `OBSERVED`（产品负责人实测，2026-10-11） | 产品负责人反馈 |
 | G9 | 付费加密形态 | `UNVERIFIED` | PP-002/003 BLOCKED |
 | G10 | macOS | `UNVERIFIED` | 未测 |
 

@@ -24,73 +24,9 @@ FIXTURES = TEMPLATES / "fixtures"
 MALFORMED = FIXTURES / "malformed-inputs"
 ENTRY = SKILL_ROOT / "scripts" / "designbuddy.py"
 PP_BLOCK = "BLOCKED: REQUIRES_PAID_ENCRYPTED_MARKETPLACE_RUNTIME"
-# Files the WorkBuddy client adds to an installed skill root. OBSERVED: WorkBuddy 5.7.7.0 / Windows 11
-# writes `_user_meta.json` at install time. Only the file NAME is checked; its content is never read.
-PLATFORM_META = {"_user_meta.json"}
 INS_IDS = ("INS-001", "INS-002", "INS-003", "INS-004", "INS-005")
-
-
-# ---------------------------------------------------------------- environment & package
-
-def _child_env():
-    env = dict(os.environ)
-    env["PYTHONIOENCODING"] = "utf-8"
-    env["PYTHONDONTWRITEBYTECODE"] = "1"
-    return env
-
-
-def environment():
-    tools = {n: bool(shutil.which(n)) for n in ("python3", "python", "py", "node", "bash", "zsh", "pwsh", "powershell")}
-    shell = {k: (Path(os.environ[k]).name if k in ("SHELL", "COMSPEC") else "present") if k in os.environ else None
-             for k in ("SHELL", "COMSPEC", "PSModulePath", "MSYSTEM", "TERM_PROGRAM")}
-    return {"designbuddy": DESIGNBUDDY_VERSION, "skill": SKILL_NAME, "schema_version": SCHEMA_VERSION,
-            "os": sys.platform, "platform": platform.platform(), "machine": platform.machine(),
-            "python": {"version": platform.python_version(), "implementation": platform.python_implementation()},
-            "tools_on_path": tools, "shell_hints": shell, "cwd": str(Path.cwd()), "skill_root": str(SKILL_ROOT),
-            "fs_encoding": sys.getfilesystemencoding(), "workbuddy_version": "UNKNOWN（由 Agent 记录：ENV-007）",
-            "package": package_fingerprint(), "captured_at": now_iso()}
-
-
-def package_fingerprint():
-    """Ties a report to a release: version + SHA-256 of templates/package-manifest.json."""
-    man = TEMPLATES / "package-manifest.json"
-    if not man.is_file():
-        return {"version": DESIGNBUDDY_VERSION, "manifest_sha256": None, "note": "开发源码（未打包）"}
-    data = read_json(man)
-    return {"version": data.get("version"), "manifest_sha256": sha256_bytes(man.read_bytes()), "files": len(data.get("files", {}))}
-
-
-def installed_extras():
-    """Files present in the installed skill but not in the package manifest, classified."""
-    man = TEMPLATES / "package-manifest.json"
-    if not man.is_file():
-        return None
-    listed = set(read_json(man)["files"]) | {"templates/package-manifest.json"}
-    platform, unknown = [], []
-    for p in sorted(SKILL_ROOT.rglob("*")):
-        if not p.is_file() or "__pycache__" in p.parts:
-            continue
-        rel = p.relative_to(SKILL_ROOT).as_posix()
-        if rel in listed:
-            continue
-        (platform if rel in PLATFORM_META else unknown).append(rel)
-    return {"platform": platform, "unknown": unknown}
-
-
-def package_integrity():
-    man_path = TEMPLATES / "package-manifest.json"
-    if not man_path.is_file():
-        return {"ok": False, "reason": "templates/package-manifest.json 不存在（开发源码未经打包）", "mismatch": [], "missing": []}
-    man = read_json(man_path)
-    mismatch, missing = [], []
-    for rel, want in man["files"].items():
-        p = SKILL_ROOT / rel
-        if not p.is_file():
-            missing.append(rel)
-        elif sha256_bytes(p.read_bytes()) != want:
-            mismatch.append(rel)
-    return {"ok": not mismatch and not missing, "version": man.get("version"), "files": len(man["files"]),
-            "mismatch": mismatch, "missing": missing}
+from .runtime import (PLATFORM_META, _child_env, environment, installed_extras,  # noqa: E402,F401
+                      package_fingerprint, package_integrity)
 
 
 # ---------------------------------------------------------------- fixtures
@@ -442,6 +378,27 @@ def _core_tests(R):
         return ok(len(paths) == 9, "已复制 %d 个产物到 artifacts/" % len(paths), paths=paths)
     R.case("CORE-013", "CORE", "Alpha / Beta / Gamma 的 Brand Skill ZIP、Portable ZIP、Preview 已输出", "产物齐全", "P1", collect)
 
+    def deliver_ok():
+        from . import deliver
+        fake = R.work / "Downloads 下载"
+        fake.mkdir(parents=True, exist_ok=True)
+        old = os.environ.get("DESIGNBUDDY_DOWNLOADS")
+        os.environ["DESIGNBUDDY_DOWNLOADS"] = str(fake)  # never touch the real Downloads folder during QA
+        try:
+            d1 = deliver.deliver(_fx(R, "brand-alpha")["ws"])
+            names = sorted(Path(f["file"]).relative_to(Path(d1["folder"])).as_posix() for f in d1["files"])
+            want = {"alpha-demo-brand-system-1.0.0.zip", "alpha-demo-portable-design-system-1.0.0.zip", "安装说明.txt",
+                    "preview/poster.html", "preview/onepager.html", "source-report.md"}
+            zip_ok = package.zip_roots(d1["skill_zip"]) == ["alpha-demo-brand-system"]
+        finally:
+            if old is None:
+                os.environ.pop("DESIGNBUDDY_DOWNLOADS", None)
+            else:
+                os.environ["DESIGNBUDDY_DOWNLOADS"] = old
+        return ok(set(names) == want and zip_ok and d1["found_by"] == "env:DESIGNBUDDY_DOWNLOADS",
+                  "交付到 <下载>/DesignBuddy/alpha-demo/：%s；ZIP 单根=%s" % (names, zip_ok))
+    R.case("CORE-014", "CORE", "交付包复制到下载文件夹（DesignBuddy/<品牌>/），附安装说明", "6 个文件齐全，ZIP 可直接用于客户端导入", "P1", deliver_ok)
+
 
 def _copy_ir_with(R, changes):
     ws = R.work / "schema-test"
@@ -665,6 +622,31 @@ def _sec_tests(R):
         unchanged = integ.get("ok", True) or "reason" in integ
         return ok(inside and unchanged, "产物均在报告目录内=%s；Skill 自身文件未被修改=%s" % (inside, unchanged))
     R.case("SEC-011", "SEC", "输出限定在报告目录，Skill 自身不被修改", "全部产物在 <run-dir>/artifacts", "P1", confined)
+
+    def deliver_no_overwrite():
+        from . import deliver
+        fake = R.work / "dl-overwrite"
+        fake.mkdir(parents=True, exist_ok=True)
+        target = fake / "DesignBuddy" / "beta-demo"
+        target.mkdir(parents=True)
+        user_file = target / "beta-demo-brand-system-1.0.0.zip"
+        user_file.write_bytes(b"user's own file")
+        old = os.environ.get("DESIGNBUDDY_DOWNLOADS")
+        os.environ["DESIGNBUDDY_DOWNLOADS"] = str(fake)
+        try:
+            d1 = deliver.deliver(_fx(R, "brand-beta")["ws"])
+            d2 = deliver.deliver(_fx(R, "brand-beta")["ws"])
+        finally:
+            if old is None:
+                os.environ.pop("DESIGNBUDDY_DOWNLOADS", None)
+            else:
+                os.environ["DESIGNBUDDY_DOWNLOADS"] = old
+        kept = user_file.read_bytes() == b"user's own file"
+        renamed = Path(d1["skill_zip"]).name == "beta-demo-brand-system-1.0.0-2.zip"
+        idem = all(f["action"] == "unchanged" for f in d2["files"])
+        missing, how = (lambda e: (e[0], e[1]))(expect_error(lambda: deliver.deliver(_fx(R, "brand-beta")["ws"], str(fake / "不存在")), "E_DELIVER_TARGET"))
+        return ok(kept and renamed and idem and missing, "原文件保留=%s；新文件改名=%s；重复交付不重写=%s；目录不存在时报错=%s" % (kept, renamed, idem, missing))
+    R.case("SEC-014", "SEC", "交付不覆盖用户已有文件，重复交付幂等", "已有同名文件保留，新文件加序号", "P0", deliver_no_overwrite)
     R.case("SEC-012", "SEC", "报告脱敏：不出现用户主目录绝对路径", "报告中只有 <HOME>/<RUN_DIR> 占位", "P1",
            lambda: {"result": "NOT_TESTED", "actual": "在报告写出后检查"})
 

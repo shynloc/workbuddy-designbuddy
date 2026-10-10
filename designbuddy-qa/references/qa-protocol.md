@@ -70,20 +70,26 @@
 
 ## 4. 安装链路（INS-001 ~ INS-007）
 
-### 已知平台事实（OBSERVED，WorkBuddy 5.7.7 / Windows 11，两轮测试）
+### 已知平台事实（OBSERVED，WorkBuddy 5.7.7 / Windows 11）
 
-| 方式 | 实测结果 |
+| 方式 | 结果 |
 |---|---|
-| H1 | `search_and_install_skills` 只能安装技能市场中的 Skill，不接受本地 ZIP 或目录 |
-| H2 | 内置的 `skill-creator` 只提供创建和打包引导（init_skill.py / package_skill.py），**没有安装执行器** |
-| H3（发送路径文字） | 用户发送"请把这个 ZIP 原样安装……：<路径>"后，会被转给 `marketplace-skill-installer`，最终仍然是只支持市场的 `search_and_install_skills` |
-| 平台 UI 或附件安装 | designbuddy-qa 本身是由平台装上的：安装目录里有平台写入的 `_user_meta.json` |
+| H1 | `search_and_install_skills` 只支持市场 Skill → INS-001 直接记为 BLOCKED，引用本条 |
+| H2 | `skill-creator` 没有安装器 → INS-002 直接记为 BLOCKED，引用本条 |
+| H3a | 路径文字会被转给市场安装器 → 不必再测，INS-003 记为 NOT_TESTED，reason 写"已知不可行（第 2 轮）" |
+| H4 | 客户端技能导入可以安装本地 ZIP（产品负责人确认）→ **本轮的主路径** |
 
-结论：Agent 侧没有可用的本地安装通道。**H3b（附件）和 H4（UI 导入）是目前仅剩的候选路径，必须实际尝试。**
-
-1. 在 `<RUN>/artifacts/` 中找到以下两个文件：
+1. 测试品牌包位于 `<RUN>/artifacts/`：
    - `alpha-demo-brand-system-1.0.0.zip`
    - `beta-demo-brand-system-1.0.0.zip`
+
+   用户确认安装后（见第 2 步），执行下面的命令，把它们复制到**下载文件夹**：
+
+   ```
+   <PY> "<SKILL>/scripts/designbuddy.py" deliver --run "<RUN>"
+   ```
+
+   文件会放到 `<下载>/DesignBuddy/QA-<run_id>/`，方便用户在客户端导入（H4）。
 2. 按 @references/installation-handoff.md 的格式展示摘要，询问：
 
    > 是否允许安装这两个测试品牌 Skill？

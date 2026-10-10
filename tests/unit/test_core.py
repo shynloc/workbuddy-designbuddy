@@ -234,3 +234,40 @@ class FixRound2Tests(unittest.TestCase):
             self.assertEqual((c["execution_type"], c["result"]), ("MANUAL", "NOT_TESTED"))
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
+
+
+class DeliverTests(unittest.TestCase):
+    def test_downloads_override_and_no_overwrite(self):
+        import os
+        from dbcore import deliver
+        tmp = Path(tempfile.mkdtemp())
+        old = os.environ.get("DESIGNBUDDY_DOWNLOADS")
+        try:
+            os.environ["DESIGNBUDDY_DOWNLOADS"] = str(tmp / "dl")
+            (tmp / "dl").mkdir()
+            self.assertEqual(deliver.downloads_dir(), (tmp / "dl", "env:DESIGNBUDDY_DOWNLOADS"))
+            res = qarunner.run_fixture("brand-gamma-new", tmp / "ws")
+            d = deliver.deliver(tmp / "ws")
+            self.assertTrue(Path(d["skill_zip"]).is_file())
+            self.assertTrue((Path(d["folder"]) / "安装说明.txt").is_file())
+            self.assertTrue(Path(d["folder"]).as_posix().endswith("dl/DesignBuddy/gamma-demo"))
+            again = deliver.deliver(tmp / "ws")
+            self.assertTrue(all(f["action"] == "unchanged" for f in again["files"]))
+            self.assertTrue(res["ok"])
+        finally:
+            if old is None:
+                os.environ.pop("DESIGNBUDDY_DOWNLOADS", None)
+            else:
+                os.environ["DESIGNBUDDY_DOWNLOADS"] = old
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_deliver_requires_build(self):
+        from dbcore import deliver
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            W.init(FIX / "brand-beta.json", tmp / "ws")
+            with self.assertRaises(DBError) as cm:
+                deliver.deliver(tmp / "ws", str(tmp))
+            self.assertEqual(cm.exception.code, "E_NOT_BUILT")
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)

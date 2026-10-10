@@ -1,4 +1,4 @@
-# TEST_MATRIX — DesignBuddy QA v0.1.2
+# TEST_MATRIX — DesignBuddy QA v0.1.3
 
 由 `tools/build_release.py` 从 QA Runner 的用例定义自动生成。Test ID 稳定，后续版本只新增、不重排。
 
@@ -30,7 +30,7 @@
 | PKG-008 | SCRIPT | P1 | 安装副本中的额外文件：平台元数据与未知文件分开判定 | 没有未知的额外文件 | PASS |
 | PKG-007 | SCRIPT | P0 | 运行时可读取内置模板 | 模板可读且非空 | PASS |
 
-## CORE · 核心功能（13）
+## CORE · 核心功能（14）
 
 | ID | 类型 | 级别 | 目标 | 预期 | 开发机结果 |
 |---|---|---|---|---|---|
@@ -47,6 +47,7 @@
 | CORE-011 | SCRIPT | P1 | 同一输入两次构建结果可复现 | 规范化后逐文件一致 | PASS |
 | CORE-012 | SCRIPT | P1 | Brand Skill 自检：原样 MATCH，篡改后 MISMATCH | 两种情况都被正确识别 | PASS |
 | CORE-013 | SCRIPT | P1 | Alpha / Beta / Gamma 的 Brand Skill ZIP、Portable ZIP、Preview 已输出 | 产物齐全 | PASS |
+| CORE-014 | SCRIPT | P1 | 交付包复制到下载文件夹（DesignBuddy/<品牌>/），附安装说明 | 6 个文件齐全，ZIP 可直接用于客户端导入 | PASS |
 
 ## QA · 设计质量（10）
 
@@ -63,7 +64,7 @@
 | QA-009 | SCRIPT | P0 | 所有输出中不含字体文件 | 无 .ttf/.otf/.woff 等 | PASS |
 | QA-010 | SCRIPT | P1 | Brand Skill 内容完整（17 个 references） | 全部存在 | PASS |
 
-## SEC · 安全与隐私（13）
+## SEC · 安全与隐私（14）
 
 | ID | 类型 | 级别 | 目标 | 预期 | 开发机结果 |
 |---|---|---|---|---|---|
@@ -79,6 +80,7 @@
 | SEC-009 | SCRIPT | P0 | 不覆盖已存在的不同版本 Skill | 返回 E_EXISTS，原文件不变 | PASS |
 | SEC-010 | SCRIPT | P0 | 不联网（静态检查网络模块） | 没有任何网络模块导入 | PASS |
 | SEC-011 | SCRIPT | P1 | 输出限定在报告目录，Skill 自身不被修改 | 全部产物在 <run-dir>/artifacts | PASS |
+| SEC-014 | SCRIPT | P0 | 交付不覆盖用户已有文件，重复交付幂等 | 已有同名文件保留，新文件加序号 | PASS |
 | SEC-012 | SCRIPT | P1 | 报告脱敏：不出现用户主目录绝对路径 | 报告中只有 <HOME>/<RUN_DIR> 占位 | PASS |
 
 ## INS · 安装链路（8）
@@ -121,4 +123,4 @@
 | UX-003 | SCRIPT | P3 | 构建耗时 | 每个品牌 < 30 秒 | PASS |
 | UX-004 | SCRIPT | P1 | 错误后可恢复，不破坏工作区 | 失败后可修正并继续 | PASS |
 
-合计 72 个用例：AGENT 7、MANUAL 8、SCRIPT 57。
+合计 74 个用例：AGENT 7、MANUAL 8、SCRIPT 59。

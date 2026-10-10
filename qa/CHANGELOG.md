@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## designbuddy-qa 0.1.3 — 2026-10-11（产品负责人决策：H4 客户端导入 + 交付到下载文件夹）
+
+- 新增 `deliver` 命令和 `build --deliver`：交付包复制到 `<下载>/DesignBuddy/<品牌>/`，附安装说明，不覆盖已有文件。下载文件夹的定位方式：Windows 读注册表 Known Folder，Linux 读 XDG，其余用 ~/Downloads；可以用 DESIGNBUDDY_DOWNLOADS 覆盖。
+- `deliver --run <RUN>`：把 QA 报告中的品牌 ZIP 复制到 `<下载>/DesignBuddy/QA-<run_id>/`。
+- 安装交接改为以 H4（客户端技能导入）为主路径；H1、H2、H3a 记为已知不可行。
+- 新增用例 CORE-014（交付）、SEC-014（交付不覆盖、幂等）；新增 2 个单元测试（共 21 个）。
+- 抽出 `dbcore/runtime.py`（环境、指纹、完整性检查），供商业版复用。
+
 ## designbuddy-qa 0.1.2 — 2026-10-11（修复 WorkBuddy 真机报告 qa-20261011-025430-7c19）
 
 详见 `qa/FIX_REPORT.md`。

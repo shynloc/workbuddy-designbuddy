@@ -12,7 +12,8 @@ Commands:
   gate        --workspace DIR --gate G1..G6 --decision KEEP|CHANGE|REJECT [--set key=value ...] [--note TEXT]
   validate    --workspace DIR [--release]
   preview     --workspace DIR
-  build       --workspace DIR [--force]
+  build       --workspace DIR [--force] [--deliver [--to DIR]]
+  deliver     --workspace DIR | --run RUN [--to DIR]   (复制到 下载/DesignBuddy/…，不覆盖已有文件)
   fixture     --name brand-alpha|brand-beta|brand-gamma-new --workspace DIR   (runs a fixture end to end)
   run-all     [--out DIR]                     (QA RUN ALL)
   record      --run DIR --id TEST_ID --result R --actual TEXT [--evidence TEXT] [--context TEXT] [--reason TEXT] [--commands TEXT ...]
@@ -54,6 +55,10 @@ def parse_set(pairs):
     return patch
 
 
+def _has_qa():
+    return (Path(__file__).resolve().parent / "dbcore" / "qarunner.py").is_file()
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="designbuddy", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd")
@@ -67,6 +72,10 @@ def main(argv=None):
     s = sub.add_parser("validate"); s.add_argument("--workspace", required=True); s.add_argument("--release", action="store_true")
     s = sub.add_parser("preview"); s.add_argument("--workspace", required=True)
     s = sub.add_parser("build"); s.add_argument("--workspace", required=True); s.add_argument("--force", action="store_true")
+    s.add_argument("--deliver", action="store_true", help="构建后把交付包复制到下载文件夹（或 --to 指定的目录）")
+    s.add_argument("--to", default=None)
+    s = sub.add_parser("deliver"); g = s.add_mutually_exclusive_group(required=True)
+    g.add_argument("--workspace"); g.add_argument("--run", help="QA 报告目录：交付其中的 Brand Skill ZIP"); s.add_argument("--to", default=None)
     s = sub.add_parser("fixture"); s.add_argument("--name", required=True); s.add_argument("--workspace", required=True)
     s = sub.add_parser("run-all"); s.add_argument("--out", default=None)
     s = sub.add_parser("finalize"); s.add_argument("--run", required=True)
@@ -83,12 +92,18 @@ def main(argv=None):
         if args.cmd in (None, "version"):
             return out({"ok": True, "name": util.SKILL_NAME, "version": util.DESIGNBUDDY_VERSION, "schema_version": util.SCHEMA_VERSION})
         if args.cmd == "env":
-            from dbcore import qarunner
-            return out({"ok": True, "environment": qarunner.environment()})
+            from dbcore import runtime, deliver
+            env = runtime.environment()
+            d, how = deliver.downloads_dir()
+            env["downloads"] = {"exists": d.is_dir(), "found_by": how}
+            return out({"ok": True, "environment": env})
         if args.cmd == "selftest":
-            from dbcore import qarunner
-            res = qarunner.package_integrity()
+            from dbcore import runtime
+            res = runtime.package_integrity()
+            res["installed_extras"] = runtime.installed_extras()
             return out(res, 0 if res["ok"] else 1)
+        if args.cmd in ("fixture", "run-all", "record", "finalize") and not _has_qa():
+            return out({"ok": False, "error": {"code": "E_UNAVAILABLE", "message": "此版本不包含 QA Runner"}}, 2)
         from dbcore import workspace as W
         if args.cmd == "init":
             return out(W.init(args.brief, args.workspace, args.force))
@@ -106,7 +121,18 @@ def main(argv=None):
             return out(res, 0 if res["qa"]["passed"] else 1)
         if args.cmd == "build":
             res = W.build(args.workspace, args.force)
+            if args.deliver and res["ok"]:
+                from dbcore import deliver
+                try:
+                    res["delivery"] = deliver.deliver(args.workspace, args.to)
+                except DBError as e:
+                    res["delivery"] = e.as_dict()
             return out(res, 0 if res["ok"] else 1)
+        if args.cmd == "deliver":
+            from dbcore import deliver
+            if args.run:
+                return out(deliver.deliver_run(args.run, args.to))
+            return out(deliver.deliver(args.workspace, args.to))
         if args.cmd == "fixture":
             from dbcore import qarunner
             res = qarunner.run_fixture(args.name, Path(args.workspace))

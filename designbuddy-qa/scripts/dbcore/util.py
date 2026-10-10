@@ -10,7 +10,7 @@ import os
 import re
 from pathlib import Path
 
-DESIGNBUDDY_VERSION = "0.1.2"
+DESIGNBUDDY_VERSION = "0.1.3"
 SKILL_NAME = "designbuddy-qa"
 SCHEMA_VERSION = "1.0.0"
 

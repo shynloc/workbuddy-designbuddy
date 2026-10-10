@@ -73,8 +73,10 @@
 <PY> "<SKILL>/scripts/designbuddy.py" preview --workspace "<WS>"
 <PY> "<SKILL>/scripts/designbuddy.py" gate --workspace "<WS>" --gate G5 --decision KEEP
 <PY> "<SKILL>/scripts/designbuddy.py" gate --workspace "<WS>" --gate G6 --decision KEEP
-<PY> "<SKILL>/scripts/designbuddy.py" build --workspace "<WS>"
+<PY> "<SKILL>/scripts/designbuddy.py" build --workspace "<WS>" --deliver
 ```
+
+`--deliver` 会把用户需要的文件复制到**下载文件夹**下的 `DesignBuddy/<品牌>/`，方便用户在客户端导入。
 
 `build` 的输出都在 `<WS>/exports/` 中：
 
