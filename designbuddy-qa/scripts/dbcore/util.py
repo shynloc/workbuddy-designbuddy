@@ -10,7 +10,7 @@ import os
 import re
 from pathlib import Path
 
-DESIGNBUDDY_VERSION = "0.1.0"
+DESIGNBUDDY_VERSION = "0.1.1"
 SKILL_NAME = "designbuddy-qa"
 SCHEMA_VERSION = "1.0.0"
 
@@ -165,19 +165,78 @@ def resolve_inside(base, rel, field="path"):
     return target
 
 
+_GENERIC_HOME = [
+    re.compile(r"[A-Za-z]:[\\/]+Users[\\/]+[^\\/\s\"'<>|]+", re.I),      # Windows user homes, any slash or case
+    re.compile(r"(?<![\w.])/(?:Users|home)/[^/\s\"'<>|]+"),                     # POSIX user homes (macOS, Linux)
+]
+
+
+def _path_variants(p):
+    p = str(p)
+    if not p or p in ("/", "\\"):
+        return []
+    fwd = p.replace("\\", "/")
+    back = p.replace("/", "\\")
+    return sorted({p, fwd, back, back.replace("\\", "\\\\")}, key=len, reverse=True)
+
+
+def _username():
+    for k in ("USERNAME", "USER", "LOGNAME"):
+        v = os.environ.get(k)
+        if v and len(v) >= 3:
+            return v
+    name = Path.home().name
+    return name if len(name) >= 3 else None
+
+
 def redact(text, extra=None):
-    """Replace machine-specific absolute paths in report text with placeholders."""
+    """Replace machine-specific paths with placeholders.
+
+    Handles Windows and POSIX forms, forward/back slashes, JSON-escaped
+    backslashes and drive-letter case, then any remaining user-home pattern
+    and the account name as a path segment.
+    """
     out = str(text)
-    pairs = []
-    for key, val in (extra or {}).items():
-        if val:
-            pairs.append((str(val), key))
-    home = str(Path.home())
-    if home and home not in ("/", ""):
-        pairs.append((home, "<HOME>"))
-    for val, key in sorted(pairs, key=lambda kv: -len(kv[0])):
-        out = out.replace(val, key)
+    pairs = [(v, k) for k, v in (extra or {}).items() if v]
+    pairs.append((str(Path.home()), "<HOME>"))
+    expanded = []
+    for val, key in pairs:
+        for var in _path_variants(val):
+            expanded.append((var, key))
+    for var, key in sorted(expanded, key=lambda kv: -len(kv[0])):
+        out = re.sub(re.escape(var), lambda _m, key=key: key, out, flags=re.I)
+    for rx in _GENERIC_HOME:
+        out = rx.sub("<HOME>", out)
+    user = _username()
+    if user:
+        out = re.sub(r"(?<=[\\/])%s(?=[\\/])" % re.escape(user), "<USER>", out, flags=re.I)
     return out
+
+
+def redact_obj(obj, extra=None):
+    """Apply redact() to every string inside a JSON-like structure."""
+    if isinstance(obj, str):
+        return redact(obj, extra)
+    if isinstance(obj, list):
+        return [redact_obj(x, extra) for x in obj]
+    if isinstance(obj, dict):
+        return {k: redact_obj(v, extra) for k, v in obj.items()}
+    return obj
+
+
+def leaks(text, extra=None):
+    """Return the list of path fragments that redact() should have removed."""
+    found = []
+    for val in [str(Path.home())] + [str(v) for v in (extra or {}).values() if v]:
+        for var in _path_variants(val):
+            if re.search(re.escape(var), text, flags=re.I):
+                found.append(var)
+    for rx in _GENERIC_HOME:
+        found += rx.findall(text)
+    user = _username()
+    if user and re.search(r"(?<=[\\/])%s(?=[\\/])" % re.escape(user), text, flags=re.I):
+        found.append("<username as path segment>")
+    return sorted(set(found))
 
 
 def render(template_text, mapping):

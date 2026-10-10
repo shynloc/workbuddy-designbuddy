@@ -1,19 +1,19 @@
 {
-  "run_id": "qa-20261010-174430-255e",
-  "designbuddy": "0.1.0",
+  "run_id": "qa-20261010-184556-af9a",
+  "designbuddy": "0.1.1",
   "skill": "designbuddy-qa",
-  "generated_at": "2026-10-10T17:44:31+00:00",
+  "generated_at": "2026-10-10T18:45:58+00:00",
   "summary": {
     "counts": {
-      "PASS": 56,
+      "PASS": 57,
       "FAIL": 0,
       "PARTIAL": 0,
       "BLOCKED": 2,
       "NOT_TESTED": 12
     },
-    "total": 70,
-    "script_total": 56,
-    "script_pass": 56,
+    "total": 71,
+    "script_total": 57,
+    "script_pass": 57,
     "script_pass_rate": 100.0,
     "issues": {
       "P0": 0,
@@ -38,6 +38,7 @@
       "PP-003"
     ],
     "fix_round_recommended": false,
+    "weak_evidence": [],
     "states": {
       "LOCAL_QA_PASSED": "NO",
       "READY_FOR_PLATFORM_SUBMISSION": "NO（QA 候选版不用于上架）",
@@ -101,7 +102,7 @@
       "error_or_block_reason": "",
       "severity": "P0",
       "suggested_fix": "",
-      "seconds": 0.002
+      "seconds": 0.001
     },
     {
       "id": "ENV-004",
@@ -119,7 +120,7 @@
       "error_or_block_reason": "",
       "severity": "P2",
       "suggested_fix": "",
-      "seconds": 0.001
+      "seconds": 0.0
     },
     {
       "id": "ENV-005",
@@ -204,7 +205,7 @@
       "area": "PKG",
       "objective": "SKILL.md frontmatter 合法且必填字段齐全",
       "expected": "无 frontmatter 错误",
-      "actual": "name=designbuddy-qa version=0.1.0",
+      "actual": "name=designbuddy-qa version=0.1.1",
       "result": "PASS",
       "execution_type": "SCRIPT",
       "runtime_context": "SCRIPT · linux · Python 3.13.16 · 安装形态见 ENV-008",
@@ -251,7 +252,7 @@
       "error_or_block_reason": "",
       "severity": "P0",
       "suggested_fix": "",
-      "seconds": 0.001
+      "seconds": 0.0
     },
     {
       "id": "PKG-004",
@@ -276,7 +277,7 @@
       "area": "PKG",
       "objective": "包内无绝对路径、密钥、字体、垃圾文件、非标准根目录项",
       "expected": "lint 无错误",
-      "actual": "lint errors=0 warnings=0 files=47",
+      "actual": "lint errors=0 warnings=0 files=47；平台元数据（另见 PKG-008）：['_user_meta.json']",
       "result": "PASS",
       "execution_type": "SCRIPT",
       "runtime_context": "SCRIPT · linux · Python 3.13.16 · 安装形态见 ENV-008",
@@ -294,7 +295,7 @@
       "area": "PKG",
       "objective": "入口脚本可作为独立子进程执行",
       "expected": "退出码 0，版本号正确",
-      "actual": "exit=0 version=0.1.0",
+      "actual": "exit=0 version=0.1.1",
       "result": "PASS",
       "execution_type": "SCRIPT",
       "runtime_context": "SCRIPT · linux · Python 3.13.16 · 安装形态见 ENV-008",
@@ -307,7 +308,25 @@
       "error_or_block_reason": "",
       "severity": "P0",
       "suggested_fix": "",
-      "seconds": 0.058
+      "seconds": 0.05
+    },
+    {
+      "id": "PKG-008",
+      "area": "PKG",
+      "objective": "安装副本中的额外文件：平台元数据与未知文件分开判定",
+      "expected": "没有未知的额外文件",
+      "actual": "平台元数据文件：['_user_meta.json']；未知额外文件：无",
+      "result": "PASS",
+      "execution_type": "SCRIPT",
+      "runtime_context": "SCRIPT · linux · Python 3.13.16 · 安装形态见 ENV-008",
+      "steps": [],
+      "commands_or_actions": [],
+      "artifact_paths": [],
+      "evidence": "平台元数据只核对文件名，不读取内容（隐私）。已知列表：['_user_meta.json']",
+      "error_or_block_reason": "",
+      "severity": "P1",
+      "suggested_fix": "",
+      "seconds": 0.002
     },
     {
       "id": "PKG-007",
@@ -341,13 +360,13 @@
         "fixture brand-alpha（Existing）"
       ],
       "artifact_paths": [
-        "artifacts/_work/brand-alpha/brand-ir/brand-ir.json"
+        ".qa-work/brand-alpha/brand-ir/brand-ir.json"
       ],
       "evidence": "primary 候选：['#1F4FD8', '#2456DD']",
       "error_or_block_reason": "",
       "severity": "P0",
       "suggested_fix": "",
-      "seconds": 0.09
+      "seconds": 0.092
     },
     {
       "id": "CORE-002",
@@ -361,13 +380,13 @@
       "steps": [],
       "commands_or_actions": [],
       "artifact_paths": [
-        "artifacts/_work/brand-beta/brand-ir/brand-ir.json"
+        ".qa-work/brand-beta/brand-ir/brand-ir.json"
       ],
       "evidence": "",
       "error_or_block_reason": "",
       "severity": "P0",
       "suggested_fix": "",
-      "seconds": 0.091
+      "seconds": 0.08
     },
     {
       "id": "CORE-003",
@@ -381,13 +400,13 @@
       "steps": [],
       "commands_or_actions": [],
       "artifact_paths": [
-        "artifacts/_work/brand-gamma-new/brand-ir/brand-ir.json"
+        ".qa-work/brand-gamma-new/brand-ir/brand-ir.json"
       ],
       "evidence": "",
       "error_or_block_reason": "",
       "severity": "P0",
       "suggested_fix": "",
-      "seconds": 0.078
+      "seconds": 0.074
     },
     {
       "id": "CORE-004",
@@ -405,7 +424,7 @@
       "error_or_block_reason": "",
       "severity": "P1",
       "suggested_fix": "",
-      "seconds": 0.037
+      "seconds": 0.035
     },
     {
       "id": "CORE-005",
@@ -455,8 +474,8 @@
       "steps": [],
       "commands_or_actions": [],
       "artifact_paths": [
-        "artifacts/_work/brand-alpha/exports/alpha-demo-brand-system-1.0.0.zip",
-        "artifacts/_work/brand-alpha/exports/workbuddy-skill/alpha-demo-brand-system"
+        ".qa-work/brand-alpha/exports/alpha-demo-brand-system-1.0.0.zip",
+        ".qa-work/brand-alpha/exports/workbuddy-skill/alpha-demo-brand-system"
       ],
       "evidence": "",
       "error_or_block_reason": "",
@@ -476,7 +495,7 @@
       "steps": [],
       "commands_or_actions": [],
       "artifact_paths": [
-        "artifacts/_work/brand-alpha/exports/portable-design-system"
+        ".qa-work/brand-alpha/exports/portable-design-system"
       ],
       "evidence": "",
       "error_or_block_reason": "",
@@ -496,8 +515,8 @@
       "steps": [],
       "commands_or_actions": [],
       "artifact_paths": [
-        "artifacts/_work/brand-alpha/exports/preview/onepager.html",
-        "artifacts/_work/brand-alpha/exports/preview/poster.html"
+        ".qa-work/brand-alpha/exports/preview/onepager.html",
+        ".qa-work/brand-alpha/exports/preview/poster.html"
       ],
       "evidence": "",
       "error_or_block_reason": "",
@@ -528,7 +547,7 @@
       "area": "CORE",
       "objective": "同一输入两次构建结果可复现",
       "expected": "规范化后逐文件一致",
-      "actual": "比较 38 个文件（排除 generated_at）；差异 无；build_id 00198c2fe97f / 00198c2fe97f",
+      "actual": "比较 38 个文件（排除 generated_at）；差异 无；build_id 69c08dd42588 / 69c08dd42588",
       "result": "PASS",
       "execution_type": "SCRIPT",
       "runtime_context": "SCRIPT · linux · Python 3.13.16 · 安装形态见 ENV-008",
@@ -539,7 +558,7 @@
       "error_or_block_reason": "",
       "severity": "P1",
       "suggested_fix": "",
-      "seconds": 0.168
+      "seconds": 0.191
     },
     {
       "id": "CORE-012",
@@ -559,7 +578,7 @@
       "error_or_block_reason": "",
       "severity": "P1",
       "suggested_fix": "",
-      "seconds": 0.095
+      "seconds": 0.08
     },
     {
       "id": "CORE-013",
@@ -587,7 +606,7 @@
       "error_or_block_reason": "",
       "severity": "P1",
       "suggested_fix": "",
-      "seconds": 0.009
+      "seconds": 0.008
     },
     {
       "id": "QA-001",
@@ -623,7 +642,7 @@
       "error_or_block_reason": "",
       "severity": "P0",
       "suggested_fix": "",
-      "seconds": 0.001
+      "seconds": 0.002
     },
     {
       "id": "QA-003",
@@ -659,7 +678,7 @@
       "error_or_block_reason": "",
       "severity": "P1",
       "suggested_fix": "",
-      "seconds": 0.032
+      "seconds": 0.029
     },
     {
       "id": "QA-005",
@@ -695,7 +714,7 @@
       "error_or_block_reason": "",
       "severity": "P1",
       "suggested_fix": "",
-      "seconds": 0.019
+      "seconds": 0.018
     },
     {
       "id": "QA-007",
@@ -709,7 +728,7 @@
       "steps": [],
       "commands_or_actions": [],
       "artifact_paths": [
-        "artifacts/_work/brand-alpha/exports/workbuddy-skill/alpha-demo-brand-system/templates/assets/asset-manifest.json"
+        ".qa-work/brand-alpha/exports/workbuddy-skill/alpha-demo-brand-system/templates/assets/asset-manifest.json"
       ],
       "evidence": "",
       "error_or_block_reason": "",
@@ -783,13 +802,13 @@
       "steps": [],
       "commands_or_actions": [],
       "artifact_paths": [
-        "artifacts/_work/xss/exports/preview"
+        ".qa-work/xss/exports/preview"
       ],
       "evidence": "",
       "error_or_block_reason": "",
       "severity": "P0",
       "suggested_fix": "",
-      "seconds": 0.079
+      "seconds": 0.073
     },
     {
       "id": "SEC-002",
@@ -910,14 +929,14 @@
       "runtime_context": "SCRIPT · linux · Python 3.13.16 · 安装形态见 ENV-008",
       "steps": [],
       "commands_or_actions": [
-        "python designbuddy.py init --brief <SKILL>/templates/fixtures/malformed-inputs/invalid-json.json --workspace artifacts/_work/badjson"
+        "python designbuddy.py init --brief <SKILL>/templates/fixtures/malformed-inputs/invalid-json.json --workspace .qa-work/badjson"
       ],
       "artifact_paths": [],
       "evidence": "",
       "error_or_block_reason": "",
       "severity": "P1",
       "suggested_fix": "",
-      "seconds": 0.108
+      "seconds": 0.077
     },
     {
       "id": "SEC-008",
@@ -935,7 +954,7 @@
       "error_or_block_reason": "",
       "severity": "P0",
       "suggested_fix": "",
-      "seconds": 0.01
+      "seconds": 0.011
     },
     {
       "id": "SEC-009",
@@ -953,7 +972,7 @@
       "error_or_block_reason": "",
       "severity": "P0",
       "suggested_fix": "",
-      "seconds": 0.038
+      "seconds": 0.02
     },
     {
       "id": "SEC-010",
@@ -971,7 +990,7 @@
       "error_or_block_reason": "",
       "severity": "P0",
       "suggested_fix": "",
-      "seconds": 0.009
+      "seconds": 0.008
     },
     {
       "id": "SEC-011",
@@ -989,14 +1008,14 @@
       "error_or_block_reason": "",
       "severity": "P1",
       "suggested_fix": "",
-      "seconds": 0.072
+      "seconds": 0.002
     },
     {
       "id": "SEC-012",
       "area": "SEC",
       "objective": "报告脱敏：不出现用户主目录绝对路径",
       "expected": "报告中只有 <HOME>/<RUN_DIR> 占位",
-      "actual": "报告中出现主目录路径=False",
+      "actual": "检查 5 个报告文件（Windows/POSIX、正反斜杠、JSON 转义、盘符大小写、用户名路径段）；泄漏：无",
       "result": "PASS",
       "execution_type": "SCRIPT",
       "runtime_context": "SCRIPT · linux · Python 3.13.16 · 安装形态见 ENV-008",
@@ -1365,7 +1384,7 @@
       "area": "UX",
       "objective": "构建耗时",
       "expected": "每个品牌 < 30 秒",
-      "actual": "构建耗时（秒）：{'brand-alpha': 0.09, 'brand-beta': 0.09, 'brand-gamma-new': 0.08}",
+      "actual": "构建耗时（秒）：{'brand-alpha': 0.09, 'brand-beta': 0.08, 'brand-gamma-new': 0.07}",
       "result": "PASS",
       "execution_type": "SCRIPT",
       "runtime_context": "SCRIPT · linux · Python 3.13.16 · 安装形态见 ENV-008",
@@ -1394,7 +1413,7 @@
       "error_or_block_reason": "",
       "severity": "P1",
       "suggested_fix": "",
-      "seconds": 0.025
+      "seconds": 0.021
     }
   ]
 }

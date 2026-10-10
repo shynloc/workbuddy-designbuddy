@@ -41,13 +41,17 @@
 用下面的命令回填 Agent 和人工用例：
 
 ```
-<PY> "<SKILL>/scripts/designbuddy.py" record --run "<RUN>" --id <ID> --result <PASS|FAIL|PARTIAL|BLOCKED|NOT_TESTED> --actual "<实际情况>" --evidence "<证据：命令输出摘要/截图名>" --context "<系统 / WorkBuddy 版本 / 安装形态>" [--reason "<阻塞原因>"]
+<PY> "<SKILL>/scripts/designbuddy.py" record --run "<RUN>" --id <ID> --result <PASS|FAIL|PARTIAL|BLOCKED|NOT_TESTED> --actual "<实际情况>" --evidence "<证据：命令输出摘要/截图名>" --context "<系统 / WorkBuddy 版本 / 安装形态>" [--reason "<阻塞原因>"] [--commands "<实际执行的工具调用或命令>" ...]
 ```
+
+- Agent 自己产生的临时文件（例如安全审计时解压的包），一律放到 `<RUN>/agent-notes/`。
+- 不要写进 `artifacts/`，也不要写进 `.qa-work/`。
 
 `record` 的约束：
 
 - 脚本用例（SCRIPT）不能回填，会被拒绝。
-- PASS 必须同时提供实际情况，以及证据或上下文。
+- PASS 必须同时提供 `--actual` 和 `--evidence`。
+- INS-001 ~ INS-005 的 PASS，还必须用 `--commands` 写清楚**由谁执行、调用了什么**。例如：`Skill Creator 工具调用：<工具名>(<参数>)`，或 `用户在客户端 UI 中导入 <文件>`。
 - BLOCKED 必须提供原因。
 
 ### ENV-007 WorkBuddy 版本
@@ -73,10 +77,20 @@
    > 是否允许安装这两个测试品牌 Skill？
 
    **等用户明确回复后再继续。** 用户拒绝时：INS-001 ~ 005 记为 BLOCKED，reason 写"用户未授权安装"；INS-006 记为 PASS（确认流程已执行）。
-3. 依次尝试 H1 → H2 → H3 → H4，每种方式的实际结果分别回填 INS-001 ~ INS-004：
+3. 依次尝试 H1 → H2 → H3 → H4，每种方式的实际结果分别回填 INS-001 ~ INS-004。
+
+   **关于 H5 的界定**：如果安装动作是你（Agent）自己用 Bash 或文件工具把 ZIP 解压、复制到 WorkBuddy 的 Skill 目录（例如 `~/.workbuddy/skills/`），那就是被禁止的 H5，不算 H2。
+
+   - H2 必须是 WorkBuddy 内置的 Skill Creator 或平台机制**自己**完成安装。
+   - 如果你不能确定是谁写入的，就记为 PARTIAL，并在 `--actual` 中说明。
+
+   已知平台事实（OBSERVED，WorkBuddy 5.7.7.0 / Windows 11）：`search_and_install_skills` 只能安装技能市场中的 Skill，不接受本地 ZIP 或目录。如果你的环境里也是这样，INS-001 记为 BLOCKED 并引用这一点。
+
+   各种结果的记法：
    - 方式不存在或没有权限 → BLOCKED，写明原因；
    - 尝试后失败 → FAIL，写明错误原文；
-   - 成功 → PASS。
+   - 成功 → PASS，必须附 `--commands`。
+   - 已有一种方式成功后，H3、H4 可以不执行，记为 NOT_TESTED，reason 写"已有 <Hn> PASS，按协议作为备选未执行"。
 4. INS-005：安装成功后，在已安装的 Brand Skill 目录中运行 `scripts/selfcheck.py`。
    - `overall: MATCH` → PASS；
    - 否则 → FAIL，附上 MISMATCH 列表。

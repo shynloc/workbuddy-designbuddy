@@ -1,5 +1,5 @@
 {
-  "designbuddy": "0.1.0",
+  "designbuddy": "0.1.1",
   "skill": "designbuddy-qa",
   "schema_version": "1.0.0",
   "os": "linux",
@@ -30,5 +30,10 @@
   "skill_root": "<SKILL>",
   "fs_encoding": "utf-8",
   "workbuddy_version": "UNKNOWN（由 Agent 记录：ENV-007）",
-  "captured_at": "2026-10-10T17:44:30+00:00"
+  "package": {
+    "version": "0.1.1",
+    "manifest_sha256": "45a2f988cd37ae49c7498672ad8cbd343489cdf9cd8e80b9a0fd2ff74b870f22",
+    "files": 46
+  },
+  "captured_at": "2026-10-10T18:45:56+00:00"
 }

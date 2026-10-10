@@ -1,0 +1,81 @@
+{
+  "run_id": "qa-20261010-174430-255e",
+  "designbuddy": "0.1.0",
+  "artifacts": [
+    {
+      "path": "artifacts/alpha-demo-brand-system-1.0.0.zip",
+      "bytes": 19906,
+      "sha256": "0f8d50492af030537c98b27ea753d336582c6859920ea264bea4f794e79fd03a"
+    },
+    {
+      "path": "artifacts/alpha-demo-portable-design-system-1.0.0.zip",
+      "bytes": 14051,
+      "sha256": "8622d4eae8ede58a770b142d71af525967612d900300788189c64b7e74c835c6"
+    },
+    {
+      "path": "artifacts/beta-demo-brand-system-1.0.0.zip",
+      "bytes": 19728,
+      "sha256": "c84da710f9cd1ad2fd93f649f099d4f8080e9d247191c2f49a197cda3c6b4f96"
+    },
+    {
+      "path": "artifacts/beta-demo-portable-design-system-1.0.0.zip",
+      "bytes": 13688,
+      "sha256": "461f7de7884bb17629cc4de37207f772277bdec3c734c3251d00f75fc86db88d"
+    },
+    {
+      "path": "artifacts/gamma-demo-brand-system-1.0.0.zip",
+      "bytes": 19082,
+      "sha256": "2be2073b407bfac89223a4c0ff302abe46b44a38d15380b02412d9fac2131dcd"
+    },
+    {
+      "path": "artifacts/gamma-demo-portable-design-system-1.0.0.zip",
+      "bytes": 12805,
+      "sha256": "c78bdfb0e7ef6868e911a948ed92cd45fe00a45cb474af0f15d378ab3bb677e8"
+    },
+    {
+      "path": "artifacts/preview-brand-alpha/onepager.html",
+      "bytes": 4635,
+      "sha256": "e7e93d3526fe8b2cc83dac454c8568a7fb0de5ce5926fb17157a7a332bd17170"
+    },
+    {
+      "path": "artifacts/preview-brand-alpha/poster.html",
+      "bytes": 3035,
+      "sha256": "4c0f634799a7911a2aef4a5fea090608964b6e745d9d8f4e0538eb3b83404837"
+    },
+    {
+      "path": "artifacts/preview-brand-beta/onepager.html",
+      "bytes": 4632,
+      "sha256": "6848fd0460dbf9aeb3aa34b4a0b96fa5b51690b1d523a4023cbac3c02d50fac8"
+    },
+    {
+      "path": "artifacts/preview-brand-beta/poster.html",
+      "bytes": 3009,
+      "sha256": "ecf3200c2a3d1f55383e957d362b2304548efc6146271a74b135efb1dd56b4f4"
+    },
+    {
+      "path": "artifacts/preview-brand-gamma-new/onepager.html",
+      "bytes": 4573,
+      "sha256": "cbc204753131c449ec3ac67651e3ec08534fb013fc8b44330225c6bcedf59cfa"
+    },
+    {
+      "path": "artifacts/preview-brand-gamma-new/poster.html",
+      "bytes": 3000,
+      "sha256": "6e91c221a0fcf29b008b83ef27614b632d6f920dbf0af80fefb5283af273d1f4"
+    },
+    {
+      "path": "artifacts/source-report-brand-alpha.md",
+      "bytes": 3633,
+      "sha256": "d1d6ebd04773d7aafe5c710c799ac2e3cec80a208820278195f1f653b190b3c9"
+    },
+    {
+      "path": "artifacts/source-report-brand-beta.md",
+      "bytes": 4164,
+      "sha256": "27105f1ad103f808d798ab865d87937c9721eaaf18e5555eaad24455a90503b0"
+    },
+    {
+      "path": "artifacts/source-report-brand-gamma-new.md",
+      "bytes": 4108,
+      "sha256": "c78c08769ebde3cb743344ccb1ee8f8afdfbb7f2a8f24570a06fc1a9c4ed60b2"
+    }
+  ]
+}

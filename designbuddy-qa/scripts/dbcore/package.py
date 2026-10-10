@@ -33,8 +33,14 @@ def parse_frontmatter(text):
     return fm
 
 
-def lint_skill(root):
-    """Return {"errors": [...], "warnings": [...], "frontmatter": {...}, "files": n}."""
+def lint_skill(root, platform_files=()):
+    """Return {"errors": [...], "warnings": [...], "frontmatter": {...}, "files": n, "platform_files": [...]}.
+
+    platform_files: names the WorkBuddy client is OBSERVED to add to an installed
+    skill root (e.g. `_user_meta.json`). They are reported, never read, and are
+    not package errors. Release builds pass no platform_files, so our own ZIP
+    can never contain them.
+    """
     root = Path(root)
     errors, warnings = [], []
     skill_md = root / "SKILL.md"
@@ -54,8 +60,11 @@ def lint_skill(root):
         errors.append("name 不是 kebab-case：%s" % fm["name"])
     if fm.get("name") and fm["name"] != root.name:
         warnings.append("目录名 %s 与 frontmatter name %s 不一致" % (root.name, fm["name"]))
+    platform = []
     for p in root.iterdir():
-        if p.name not in ALLOWED_TOP:
+        if p.name in platform_files and p.is_file():
+            platform.append(p.name)
+        elif p.name not in ALLOWED_TOP:
             errors.append("根目录存在非标准项：%s" % p.name)
     for m in REF_RE.finditer(text):
         ref = m.group(1)
@@ -68,6 +77,8 @@ def lint_skill(root):
     total = 0
     for p in sorted(root.rglob("*")):
         if not p.is_file() or "__pycache__" in p.parts:
+            continue
+        if p.parent == root and p.name in platform:
             continue
         n += 1
         rel = p.relative_to(root).as_posix()
@@ -87,7 +98,7 @@ def lint_skill(root):
                 errors.append("SVG 含有脚本或事件属性：%s" % rel)
     if total > 5 * 1024 * 1024:
         warnings.append("包体超过 5MB（%d bytes）" % total)
-    return {"errors": errors, "warnings": warnings, "frontmatter": fm, "files": n, "bytes": total}
+    return {"errors": errors, "warnings": warnings, "frontmatter": fm, "files": n, "bytes": total, "platform_files": platform}
 
 
 def pack(root, zip_path, root_name=None):

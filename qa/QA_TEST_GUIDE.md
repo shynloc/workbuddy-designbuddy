@@ -1,10 +1,11 @@
-# DesignBuddy QA v0.1.0 测试指南（最短路径）
+# DesignBuddy QA 测试指南（最短路径，当前版本 v0.1.1）
 
 不需要安装 Python、Node 或配置任何环境。
 
 ## 你需要做的 5 步
 
-1. **下载**：仓库中的 `dist/designbuddy-qa-v0.1.0.zip`。可以用 `dist/SHA256SUMS.txt` 校验文件。
+1. **下载**：仓库中的 `dist/v0.1.1/designbuddy-qa-v0.1.1.zip`。校验值见 `dist/v0.1.1/SHA256SUMS.txt` 和 `PACKAGE_FINGERPRINT.txt`。
+   - 如果装过 v0.1.0，请先在 WorkBuddy 中删除旧的 `designbuddy-qa`，以及测试品牌 `alpha-demo-brand-system`、`beta-demo-brand-system`。
 2. **安装**：在 WorkBuddy 中安装这个 ZIP。可以把 ZIP 发到对话里，并说"请把这个 ZIP 原样安装为 Skill，不要修改任何文件内容"；也可以用客户端的 Skill 导入入口。请记下你用的是哪种方式。
 3. **新开一个会话**，粘贴 [`WORKBUDDY_QA_PROMPT.md`](WORKBUDDY_QA_PROMPT.md) 中的提示词（先替换 `【】` 里的内容）。
 4. **只在以下节点回复**：

@@ -26,11 +26,18 @@
 | H2 Skill Creator | 调用 WorkBuddy 内置的 Skill Creator，要求它**原样安装**指定的 ZIP 或目录，**不得重新生成或修改任何文件** | 它改写了文件 → 记为 FAIL，并告知用户 |
 | H3 用户一句话 | 给用户一句可以直接复制的话：`请把这个 ZIP 原样安装为 Skill，不要修改任何文件内容：<skill_zip>` | — |
 | H4 ZIP 导入 | 告诉用户 ZIP 的路径，请用户通过 WorkBuddy 的 Skill 导入入口手动安装 | — |
-| ~~H5~~ | **禁止**：不得把文件写入或复制到 WorkBuddy 内部的 Skill 目录 | — |
+| ~~H5~~ | **禁止**：Agent 不得自己把文件写入、复制或解压到 WorkBuddy 的 Skill 目录（例如 `~/.workbuddy/skills/`）。只有 Skill Creator 或平台机制自己完成的安装，才算 H2 / H3 / H4 | — |
 
 ## 3. 安装后核对（不能只看"安装成功"的提示）
 
-1. 在已安装的 Brand Skill 中运行 `scripts/selfcheck.py`。必须得到 `overall: MATCH`：所有文件的 SHA-256 与 `templates/build-manifest.json` 一致，并且没有多余文件。
+1. 在已安装的 Brand Skill 中运行 `scripts/selfcheck.py`，按结果处理：
+
+   | 结果 | 含义 | 处理 |
+   |---|---|---|
+   | `MATCH` | 所有文件的 SHA-256 与 `templates/build-manifest.json` 一致 | 通过 |
+   | `PLATFORM-META` | 平台添加的元数据（例如 `_user_meta.json`） | 正常，不读取其内容 |
+   | `MATCH_WITH_EXTRA`（退出码 3） | 存在未知的额外文件 | 必须向用户说明 |
+   | `MISMATCH` | 文件被改写 | 安装失败 |
 2. 核对 frontmatter 中的版本，以及 `build_id`。
 3. 抽查 `references/color.md` 中主色的值，与构建时一致。
 4. 告诉用户以后怎样触发：

@@ -32,6 +32,8 @@ from dbcore import package, qarunner, util  # noqa: E402
 
 VERSION = util.DESIGNBUDDY_VERSION
 ZIP_NAME = "designbuddy-qa-v%s.zip" % VERSION
+OUT = DIST / ("v%s" % VERSION)          # every version gets its own folder; earlier packages are never touched
+EVIDENCE = QA_DOCS / "local-evidence"
 EPOCH = "1767225600"  # 2026-01-01T00:00:00Z — pinned generated_at for reproducible fixture outputs
 
 
@@ -74,10 +76,15 @@ def main():
         return 1
 
     step("4. pack QA skill")
-    DIST.mkdir(exist_ok=True)
-    for old in DIST.glob("designbuddy-qa-v*.zip"):
-        old.unlink()
-    zip_path, zip_sha = package.pack(stage, DIST / ZIP_NAME, "designbuddy-qa")
+    if (DIST / ZIP_NAME).exists():  # v0.1.0 was released at dist/ top level; never overwrite a released version
+        print("refusing: %s already released at dist/ — bump the version" % ZIP_NAME)
+        return 1
+    OUT.mkdir(parents=True, exist_ok=True)
+    zip_path, zip_sha = package.pack(stage, OUT / ZIP_NAME, "designbuddy-qa")
+    fingerprint = util.sha256_file(stage / "templates" / "package-manifest.json")
+    (OUT / "PACKAGE_FINGERPRINT.txt").write_text(
+        "designbuddy-qa %s\nzip sha256              %s\npackage-manifest sha256 %s\n"
+        "报告 environment.json 中的 package.manifest_sha256 应与上面一致。\n" % (VERSION, zip_sha, fingerprint), encoding="utf-8")
     print(zip_path.name, zip_sha, "roots:", package.zip_roots(zip_path))
 
     step("5. fixture brand packages")
@@ -90,7 +97,7 @@ def main():
                 print("fixture failed", fixture, json.dumps(res["build"]["lint"], ensure_ascii=False))
                 return 1
             b = res["build"]
-            out = DIST / folder
+            out = OUT / folder
             shutil.rmtree(out, ignore_errors=True)
             out.mkdir(parents=True)
             for key in ("skill_zip", "portable_zip"):
@@ -106,6 +113,8 @@ def main():
         inst = Path(t) / "WorkBuddy 安装 模拟"
         with zipfile.ZipFile(zip_path) as z:
             z.extractall(inst)
+        # Reproduce the OBSERVED WorkBuddy 5.7.7.0 install behaviour: the client adds _user_meta.json.
+        (inst / "designbuddy-qa" / "_user_meta.json").write_text('{"simulated": true}', encoding="utf-8")
         entry = inst / "designbuddy-qa" / "scripts" / "designbuddy.py"
         reports = Path(t) / "用户 项目" / "DesignBuddy-QA-Reports"
         c1, v_out, _ = run([sys.executable, str(entry), "version"])
@@ -117,17 +126,17 @@ def main():
             return 1
         ra = json.loads(ra_out)
         rdir = Path(ra["report_dir"])
-        ev = QA_DOCS / "local-evidence"
+        ev = EVIDENCE
         shutil.rmtree(ev, ignore_errors=True)
         ev.mkdir(parents=True)
         for n in ("TEST_REPORT.md", "results.json", "environment.json", "issues.md", "artifacts-manifest.json", "next-session-prompts.md"):
             shutil.copyfile(rdir / n, ev / n)
-        write_local_report(ra, json.loads(v_out), json.loads(st_out), lint)
+        write_local_report(ra, json.loads(v_out), json.loads(st_out), lint, zip_sha, fingerprint)
         write_test_matrix()
 
     step("7. checksums")
-    (DIST / "SHA256SUMS.txt").write_text("".join("%s  %s\n" % s for s in sums), encoding="utf-8")
-    print((DIST / "SHA256SUMS.txt").read_text(encoding="utf-8"))
+    (OUT / "SHA256SUMS.txt").write_text("".join("%s  %s\n" % s for s in sums), encoding="utf-8")
+    print((OUT / "SHA256SUMS.txt").read_text(encoding="utf-8"))
     shutil.rmtree(ROOT / "build", ignore_errors=True)
     return 0
 
@@ -153,7 +162,7 @@ def write_test_matrix():
     (QA_DOCS / "TEST_MATRIX.md").write_text("\n".join(L), encoding="utf-8")
 
 
-def write_local_report(ra, ver, selftest, lint):
+def write_local_report(ra, ver, selftest, lint, zip_sha, fingerprint):
     res = json.loads((QA_DOCS / "local-evidence" / "results.json").read_text(encoding="utf-8"))
     env = json.loads((QA_DOCS / "local-evidence" / "environment.json").read_text(encoding="utf-8"))
     s = res["summary"]
@@ -162,7 +171,8 @@ def write_local_report(ra, ver, selftest, lint):
          "## 测试环境", "",
          "- 平台：%s（%s）" % (env["platform"], env["machine"]),
          "- Python：%s；PATH 中的 node：%s" % (env["python"]["version"], env["tools_on_path"]["node"]),
-         "- 运行方式：把 `dist/%s` 解压到含空格和中文的路径，从解压后的副本执行" % ZIP_NAME,
+         "- 运行方式：把 `dist/v%s/%s` 解压到含空格和中文的路径，并写入模拟的平台元数据 `_user_meta.json`（复现 WorkBuddy 5.7.7.0 的安装行为），然后从解压后的副本执行" % (VERSION, ZIP_NAME),
+         "- 安装包：zip sha256 `%s`；package-manifest sha256 `%s`" % (zip_sha, fingerprint),
          "- WorkBuddy：**未参与**（开发容器中没有 WorkBuddy 客户端）", "",
          "## 结果", "",
          "| 项 | 结果 |", "|---|---|",
@@ -180,7 +190,7 @@ def write_local_report(ra, ver, selftest, lint):
             L.append("- `%s` %s · %s — %s" % (c["id"], c["result"], c["objective"], c["error_or_block_reason"]))
     L += ["", "## 状态", ""] + ["- %s：%s" % kv for kv in s["states"].items()]
     L += ["", "> LOCAL_QA_PASSED 为 NO 是预期结果：ENV-007/008/009、INS-*、MB-003..005 必须在 WorkBuddy 中执行并回填。", "",
-          "完整原始输出见 `qa/local-evidence/`（TEST_REPORT.md、results.json 等）。", ""]
+          "完整原始输出见 `qa/local-evidence/`（TEST_REPORT.md、results.json 等）。上一版本的证据见 `qa/history/`。", ""]
     (QA_DOCS / "TEST_REPORT_LOCAL.md").write_text("\n".join(L), encoding="utf-8")
 
 

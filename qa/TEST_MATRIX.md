@@ -1,4 +1,4 @@
-# TEST_MATRIX — DesignBuddy QA v0.1.0
+# TEST_MATRIX — DesignBuddy QA v0.1.1
 
 由 `tools/build_release.py` 从 QA Runner 的用例定义自动生成。Test ID 稳定，后续版本只新增、不重排。
 
@@ -17,7 +17,7 @@
 | ENV-008 | AGENT | P1 | 记录 Skill 安装形态：本地/市场、是否付费、是否加密、开发者/购买者 | Agent 如实记录 | NOT_TESTED |
 | ENV-009 | AGENT | P2 | 记录 Agent 实际使用的 shell 与命令执行方式 | Agent 如实记录 | NOT_TESTED |
 
-## PKG · 包装与资源（7）
+## PKG · 包装与资源（8）
 
 | ID | 类型 | 级别 | 目标 | 预期 | 开发机结果 |
 |---|---|---|---|---|---|
@@ -27,6 +27,7 @@
 | PKG-004 | SCRIPT | P1 | 安装后的包与发布构建一致（package-manifest） | 全部 SHA-256 一致 | PASS |
 | PKG-005 | SCRIPT | P0 | 包内无绝对路径、密钥、字体、垃圾文件、非标准根目录项 | lint 无错误 | PASS |
 | PKG-006 | SCRIPT | P0 | 入口脚本可作为独立子进程执行 | 退出码 0，版本号正确 | PASS |
+| PKG-008 | SCRIPT | P1 | 安装副本中的额外文件：平台元数据与未知文件分开判定 | 没有未知的额外文件 | PASS |
 | PKG-007 | SCRIPT | P0 | 运行时可读取内置模板 | 模板可读且非空 | PASS |
 
 ## CORE · 核心功能（13）
@@ -119,4 +120,4 @@
 | UX-003 | SCRIPT | P3 | 构建耗时 | 每个品牌 < 30 秒 | PASS |
 | UX-004 | SCRIPT | P1 | 错误后可恢复，不破坏工作区 | 失败后可修正并继续 | PASS |
 
-合计 70 个用例：AGENT 7、MANUAL 7、SCRIPT 56。
+合计 71 个用例：AGENT 7、MANUAL 7、SCRIPT 57。

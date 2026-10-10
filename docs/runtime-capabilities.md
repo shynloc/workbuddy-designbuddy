@@ -108,9 +108,27 @@ last_updated: 2026-10-10
 | F2 | DESIGN.md（Google Labs / Stitch） | `DERIVED` | 开放规范，**不是正式标准**；需跟踪上游 |
 | F3 | WCAG 2.x 对比度阈值（4.5:1 / 3:1） | `OFFICIAL`（W3C） | — |
 
+## G. WorkBuddy 真机观察（QA 报告 qa-20261011-015550-2691，designbuddy-qa 0.1.0）
+
+条件：Windows 11（10.0.26200）· WorkBuddy 5.7.7.0 · 本地安装 · 未付费 · 未加密 · 开发者账号 · 单次运行。
+
+| # | 能力 | 状态 | 证据 |
+|---|---|---|---|
+| G1 | Skill 执行环境有可用的 `python3`（3.13.14），也有 `python` / `py` / `node` | `OBSERVED（Windows/5.7.7.0）` | environment.json、ENV-001/009 |
+| G2 | Agent 的命令执行工具是 Bash（Git Bash，MSYSTEM 存在）；另有独立的 win32 命令工具 | `OBSERVED（Windows/5.7.7.0）` | ENV-009 |
+| G3 | 用户级 Skill 安装目录：`<HOME>/.workbuddy/skills/<skill-name>/` | `OBSERVED` | environment.json 的 skill_root（已脱敏） |
+| G4 | 安装时平台在 Skill 根目录写入 `_user_meta.json` | `OBSERVED` | PKG-005 证据 |
+| G5 | 平台工具 `search_and_install_skills` 只能按名称安装技能市场中的 Skill，不接受本地 ZIP 或目录 → H1 对本地包不适用 | `OBSERVED` | INS-001 |
+| G6 | 第三方 Skill 可以读取自身的 templates、执行自身脚本、向用户项目目录写文件（未加密形态） | `OBSERVED（未加密）` | PKG-007、PP-001、ENV-003/004 |
+| G7 | 从本地 ZIP 安装的 Brand Skill 内容逐字节保持不变（selfcheck MATCH，27 个文件） | `OBSERVED`；安装执行者待澄清（FIX-03） | INS-002/005 |
+| G8 | DesignBuddy 编译器在 Windows 和 Linux 上的产物逐文件一致 | `OBSERVED` | FIX_REPORT §1 |
+| G9 | 付费加密形态 | `UNVERIFIED` | PP-002/003 BLOCKED |
+| G10 | macOS | `UNVERIFIED` | 未测 |
+
 ## 变更记录
 
 | 日期 | 变更 |
 |---|---|
 | 2026-10-10 | 初版。C1/C2 由产品负责人实测标记为 OBSERVED；E1–E5 来自开放平台前端文案 |
+| 2026-10-11 | 新增 G 节：v0.1.0 QA 在 Windows / WorkBuddy 5.7.7.0 上的真机观察 |
 | 2026-10-10 | R2：拆分 Paid / Encrypted / Source Protection 三个概念；新增 A9、C11、E8、E9；C8（H5）改为不测试、不采用；去掉独立的"TO TEST"等级（并入 UNVERIFIED） |

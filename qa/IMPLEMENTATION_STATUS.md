@@ -1,4 +1,4 @@
-# IMPLEMENTATION_STATUS — DesignBuddy QA v0.1.0
+# IMPLEMENTATION_STATUS — DesignBuddy QA v0.1.1
 
 状态取值：**DONE**（已实现，有自动化测试覆盖）· **PARTIAL**（部分实现）· **NOT_DONE**（未实现）· **PLATFORM**（需要 WorkBuddy 真机验证）
 
@@ -13,7 +13,7 @@
 | 5 | 可预览的品牌应用样例 | DONE | `templates/preview/`：poster.html、onepager.html（离线） | CORE-009 |
 | 6 | Brand QA、对比度、资产来源与许可、内容完整性与安全 | DONE | `dbcore/qa.py`、`package.lint_skill`、`util.safe_*` | QA-*、SEC-* |
 | 7 | 用户确认后的对话内安装交接 | PARTIAL | `references/installation-handoff.md`：协议 + Brand Skill 自带 selfcheck。实际交接由 Agent 在 WorkBuddy 中执行 | INS-000（SCRIPT）；INS-001..006（PLATFORM） |
-| 8 | QA RUN ALL，结构化结果 + Markdown 报告 | DONE | `dbcore/qarunner.py`、`designbuddy.py run-all / record` | 全部 |
+| 8 | QA RUN ALL，结构化结果 + Markdown 报告 | DONE | `dbcore/qarunner.py`、`designbuddy.py run-all / record`（v0.1.1：--commands、证据不足检测、包指纹、结构化脱敏、平台元数据分级） | 全部（71 个） |
 
 ## 架构要求的落实情况
 
@@ -46,5 +46,5 @@ designbuddy-qa/                 ← 打包进 ZIP 的 Skill 本体
   templates/data/               directions.json（6 个视觉方向）· fonts.json（10 款字体的许可摘要）
   templates/fixtures/           brand-alpha / brand-beta / brand-gamma-new + 12 个畸形输入
 tools/build_release.py          ← 单元测试 → 暂存 + package-manifest → lint → 打包 → 夹具品牌包 → 解压后全量测试 → 校验和
-tests/unit/                     ← 12 个 unittest
+tests/unit/                     ← 17 个 unittest（含 5 个 v0.1.1 修复回归测试）
 ```

@@ -15,7 +15,7 @@ Commands:
   build       --workspace DIR [--force]
   fixture     --name brand-alpha|brand-beta|brand-gamma-new --workspace DIR   (runs a fixture end to end)
   run-all     [--out DIR]                     (QA RUN ALL)
-  record      --run DIR --id TEST_ID --result R --actual TEXT [--evidence TEXT] [--context TEXT] [--reason TEXT]
+  record      --run DIR --id TEST_ID --result R --actual TEXT [--evidence TEXT] [--context TEXT] [--reason TEXT] [--commands TEXT ...]
   selftest
 """
 import argparse
@@ -71,6 +71,7 @@ def main(argv=None):
     s = sub.add_parser("record"); s.add_argument("--run", required=True); s.add_argument("--id", required=True)
     s.add_argument("--result", required=True); s.add_argument("--actual", required=True); s.add_argument("--evidence", default="")
     s.add_argument("--context", default=""); s.add_argument("--reason", default="")
+    s.add_argument("--commands", action="append", default=[], help="实际执行的工具调用或命令（可重复）")
     try:
         args = ap.parse_args(argv)
     except SystemExit as e:
@@ -114,7 +115,7 @@ def main(argv=None):
             return out(res, 0)
         if args.cmd == "record":
             from dbcore import qarunner
-            return out(qarunner.record(args.run, args.id, args.result, args.actual, args.evidence, args.context, args.reason))
+            return out(qarunner.record(args.run, args.id, args.result, args.actual, args.evidence, args.context, args.reason, args.commands))
     except DBError as e:
         return out(e.as_dict(), 2)
     except Exception as e:  # noqa: BLE001 - never dump a traceback at the user

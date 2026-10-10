@@ -17,13 +17,17 @@ from pathlib import Path
 
 from . import color as C, engine, exporters, ir as IR, package, qa, workspace as W
 from .util import (DBError, DESIGNBUDDY_VERSION, SCHEMA_VERSION, SKILL_NAME, SKILL_ROOT, TEMPLATES,
-                   dump_json, now_iso, read_json, redact, sha256_bytes, write_json, write_text)
+                   dump_json, leaks, now_iso, read_json, redact, redact_obj, sha256_bytes, write_json, write_text)
 
 RESULTS = ("PASS", "FAIL", "PARTIAL", "BLOCKED", "NOT_TESTED")
 FIXTURES = TEMPLATES / "fixtures"
 MALFORMED = FIXTURES / "malformed-inputs"
 ENTRY = SKILL_ROOT / "scripts" / "designbuddy.py"
 PP_BLOCK = "BLOCKED: REQUIRES_PAID_ENCRYPTED_MARKETPLACE_RUNTIME"
+# Files the WorkBuddy client adds to an installed skill root. OBSERVED: WorkBuddy 5.7.7.0 / Windows 11
+# writes `_user_meta.json` at install time. Only the file NAME is checked; its content is never read.
+PLATFORM_META = {"_user_meta.json"}
+INS_IDS = ("INS-001", "INS-002", "INS-003", "INS-004", "INS-005")
 
 
 # ---------------------------------------------------------------- environment & package
@@ -44,7 +48,33 @@ def environment():
             "python": {"version": platform.python_version(), "implementation": platform.python_implementation()},
             "tools_on_path": tools, "shell_hints": shell, "cwd": str(Path.cwd()), "skill_root": str(SKILL_ROOT),
             "fs_encoding": sys.getfilesystemencoding(), "workbuddy_version": "UNKNOWN（由 Agent 记录：ENV-007）",
-            "captured_at": now_iso()}
+            "package": package_fingerprint(), "captured_at": now_iso()}
+
+
+def package_fingerprint():
+    """Ties a report to a release: version + SHA-256 of templates/package-manifest.json."""
+    man = TEMPLATES / "package-manifest.json"
+    if not man.is_file():
+        return {"version": DESIGNBUDDY_VERSION, "manifest_sha256": None, "note": "开发源码（未打包）"}
+    data = read_json(man)
+    return {"version": data.get("version"), "manifest_sha256": sha256_bytes(man.read_bytes()), "files": len(data.get("files", {}))}
+
+
+def installed_extras():
+    """Files present in the installed skill but not in the package manifest, classified."""
+    man = TEMPLATES / "package-manifest.json"
+    if not man.is_file():
+        return None
+    listed = set(read_json(man)["files"]) | {"templates/package-manifest.json"}
+    platform, unknown = [], []
+    for p in sorted(SKILL_ROOT.rglob("*")):
+        if not p.is_file() or "__pycache__" in p.parts:
+            continue
+        rel = p.relative_to(SKILL_ROOT).as_posix()
+        if rel in listed:
+            continue
+        (platform if rel in PLATFORM_META else unknown).append(rel)
+    return {"platform": platform, "unknown": unknown}
 
 
 def package_integrity():
@@ -91,7 +121,8 @@ class Runner:
     def __init__(self, out_dir):
         self.out = Path(out_dir)
         self.art = self.out / "artifacts"
-        self.work = self.out / "artifacts" / "_work"
+        self.work = self.out / ".qa-work"  # deleted at the end of the run; never part of artifacts
+        self.art.mkdir(parents=True, exist_ok=True)
         self.cases = []
         self.env = environment()
         self.ctx = "SCRIPT · %s · Python %s · 安装形态见 ENV-008" % (sys.platform, platform.python_version())
@@ -221,7 +252,7 @@ def _env_tests(R):
 # ---------------------------------------------------------------- PKG
 
 def _pkg_tests(R):
-    lint = package.lint_skill(SKILL_ROOT)
+    lint = package.lint_skill(SKILL_ROOT, platform_files=PLATFORM_META)
     R.case("PKG-001", "PKG", "SKILL.md frontmatter 合法且必填字段齐全", "无 frontmatter 错误", "P0",
            lambda: ok(lint["frontmatter"] and not [x for x in lint["errors"] if "frontmatter" in x or "version" in x or "name" in x],
                       "name=%s version=%s" % ((lint["frontmatter"] or {}).get("name"), (lint["frontmatter"] or {}).get("version")),
@@ -245,7 +276,8 @@ def _pkg_tests(R):
                   fix="重新安装 designbuddy-qa ZIP；若仍不一致，说明安装过程改写了文件")
     R.case("PKG-004", "PKG", "安装后的包与发布构建一致（package-manifest）", "全部 SHA-256 一致", "P1", integ)
     R.case("PKG-005", "PKG", "包内无绝对路径、密钥、字体、垃圾文件、非标准根目录项", "lint 无错误", "P0",
-           lambda: ok(not lint["errors"], "lint errors=%d warnings=%d files=%d" % (len(lint["errors"]), len(lint["warnings"]), lint["files"]),
+           lambda: ok(not lint["errors"], "lint errors=%d warnings=%d files=%d；平台元数据（另见 PKG-008）：%s" % (
+                          len(lint["errors"]), len(lint["warnings"]), lint["files"], lint.get("platform_files") or "无"),
                       json.dumps(lint["errors"][:10], ensure_ascii=False)))
 
     def entry():
@@ -254,6 +286,15 @@ def _pkg_tests(R):
         return ok(code == 0 and data.get("version") == DESIGNBUDDY_VERSION, "exit=%d version=%s" % (code, data.get("version")),
                   cmds=[shown], evidence=(se or "")[:200])
     R.case("PKG-006", "PKG", "入口脚本可作为独立子进程执行", "退出码 0，版本号正确", "P0", entry)
+
+    def extras():
+        ex = installed_extras()
+        if ex is None:
+            return {"result": "NOT_TESTED", "actual": "开发源码未经打包，没有 package-manifest", "error_or_block_reason": "仅在打包后的 Skill 中可测"}
+        return ok(not ex["unknown"], "平台元数据文件：%s；未知额外文件：%s" % (ex["platform"] or "无", ex["unknown"] or "无"),
+                  "平台元数据只核对文件名，不读取内容（隐私）。已知列表：%s" % sorted(PLATFORM_META),
+                  fix="未知额外文件可能来自安装过程或他人改动，请检查后重新安装")
+    R.case("PKG-008", "PKG", "安装副本中的额外文件：平台元数据与未知文件分开判定", "没有未知的额外文件", "P1", extras)
 
     def tmpl():
         names = ["brand-skill/SKILL.md.tmpl", "preview/poster.html.tmpl", "preview/onepager.html.tmpl", "portable/DESIGN.md.tmpl"]
@@ -628,14 +669,30 @@ def _sec_tests(R):
            lambda: {"result": "NOT_TESTED", "actual": "在报告写出后检查"})
 
 
+REPORT_FILES = ("TEST_REPORT.md", "results.json", "issues.md", "environment.json", "artifacts-manifest.json")
+
+
+def _redaction_map(out):
+    return {"<RUN_DIR>": str(Path(out).resolve()), "<SKILL>": str(SKILL_ROOT), "<CWD>": str(Path.cwd().resolve())}
+
+
+def report_leaks(out):
+    found = {}
+    for n in REPORT_FILES:
+        f = Path(out) / n
+        if f.is_file():
+            hit = leaks(f.read_text(encoding="utf-8"), _redaction_map(out))
+            if hit:
+                found[n] = len(hit)
+    return found
+
+
 def _post_redaction_check(R):
-    home = str(Path.home())
-    texts = [(R.out / n).read_text(encoding="utf-8") for n in ("TEST_REPORT.md", "results.json", "issues.md")]
-    texts.append((R.out / "environment.json").read_text(encoding="utf-8"))
-    leaked = home not in ("/", "") and any(home in t for t in texts)
+    found = report_leaks(R.out)
     for c in R.cases:
         if c["id"] == "SEC-012":
-            c.update(ok(not leaked, "报告中出现主目录路径=%s" % leaked))
+            c.update(ok(not found, "检查 %d 个报告文件（Windows/POSIX、正反斜杠、JSON 转义、盘符大小写、用户名路径段）；泄漏：%s" % (
+                len(REPORT_FILES), found or "无"), fix="检查 util.redact 是否覆盖该路径形式"))
             c["runtime_context"] = R.ctx
 
 
@@ -737,6 +794,19 @@ def _ux_tests(R):
 
 # ---------------------------------------------------------------- reports
 
+def weak_evidence(cases):
+    """AGENT/MANUAL PASS results whose evidence cannot support the claim."""
+    out = []
+    for c in cases:
+        if c["execution_type"] == "SCRIPT" or c["result"] != "PASS":
+            continue
+        if not c.get("evidence"):
+            out.append("%s：PASS 但没有证据" % c["id"])
+        elif c["id"] in INS_IDS and not c.get("commands_or_actions"):
+            out.append("%s：安装类 PASS 没有记录实际执行的工具调用或命令" % c["id"])
+    return out
+
+
 def summarize(cases):
     counts = {r: sum(1 for c in cases if c["result"] == r) for r in RESULTS}
     script = [c for c in cases if c["execution_type"] == "SCRIPT"]
@@ -747,10 +817,11 @@ def summarize(cases):
     ins_ok = any(c["id"] in ("INS-001", "INS-002", "INS-003", "INS-004") and c["result"] == "PASS" for c in cases) and \
         any(c["id"] == "INS-005" and c["result"] == "PASS" for c in cases)
     agent_ok = all(c["result"] == "PASS" for c in cases if c["id"] in ("ENV-007", "ENV-008", "ENV-009", "INS-006"))
-    local_passed = script_ok and ins_ok and agent_ok and issues["P0"] == 0 and issues["P1"] == 0
+    weak = weak_evidence(cases)
+    local_passed = script_ok and ins_ok and agent_ok and not weak and issues["P0"] == 0 and issues["P1"] == 0
     return {"counts": counts, "total": len(cases), "script_total": len(script), "script_pass": sp,
             "script_pass_rate": round(100.0 * sp / len(script), 1) if script else 0.0, "issues": issues, "unverified": unverified,
-            "fix_round_recommended": any(issues.values()),
+            "fix_round_recommended": any(issues.values()) or bool(weak), "weak_evidence": weak,
             "states": {"LOCAL_QA_PASSED": "YES" if local_passed else "NO",
                        "READY_FOR_PLATFORM_SUBMISSION": "NO（QA 候选版不用于上架）",
                        "PLATFORM_PARSE_PASSED": "NOT_REACHED", "REVIEW_APPROVED": "NOT_REACHED",
@@ -759,10 +830,10 @@ def summarize(cases):
 
 def write_reports(out, run_id, cases, env):
     out = Path(out)
-    red = {"<RUN_DIR>": str(out.resolve()), "<SKILL>": str(SKILL_ROOT), "<CWD>": str(Path.cwd().resolve())}
-    clean = json.loads(redact(json.dumps(cases, ensure_ascii=False), red))
+    red = _redaction_map(out)
+    clean = redact_obj(cases, red)
     s = summarize(clean)
-    env_r = json.loads(redact(json.dumps(env, ensure_ascii=False), red))
+    env_r = redact_obj(env, red)
     write_json(out / "environment.json", env_r)
     write_json(out / "results.json", {"run_id": run_id, "designbuddy": DESIGNBUDDY_VERSION, "skill": SKILL_NAME,
                                       "generated_at": now_iso(), "summary": s, "cases": clean})
@@ -781,7 +852,8 @@ def write_reports(out, run_id, cases, env):
 def _report_md(run_id, cases, s, env):
     L = ["# DesignBuddy QA 测试报告", "",
          "- Run ID：`%s`" % run_id, "- DesignBuddy：%s（%s）" % (DESIGNBUDDY_VERSION, SKILL_NAME),
-         "- 环境：%s · Python %s · WorkBuddy 版本：%s" % (env["platform"], env["python"]["version"], env["workbuddy_version"]), "",
+         "- 环境：%s · Python %s · WorkBuddy 版本：%s" % (env["platform"], env["python"]["version"], env["workbuddy_version"]),
+         "- 安装包指纹：version %s · package-manifest SHA-256 `%s`" % ((env.get("package") or {}).get("version"), (env.get("package") or {}).get("manifest_sha256")), "",
          "## 汇总", "",
          "| 指标 | 数值 |", "|---|---|",
          "| 用例总数 | %d |" % s["total"],
@@ -789,11 +861,12 @@ def _report_md(run_id, cases, s, env):
          "| 自动化（SCRIPT）通过率 | %s%%（%d/%d） |" % (s["script_pass_rate"], s["script_pass"], s["script_total"]),
          "| 问题数 P0 / P1 / P2 / P3 | %s |" % " / ".join(str(s["issues"][k]) for k in ("P0", "P1", "P2", "P3")),
          "| 未验证项 | %d（%s） |" % (len(s["unverified"]), ", ".join(s["unverified"]) or "无"),
+         "| 证据不足的 PASS | %s |" % ("；".join(s["weak_evidence"]) or "无"),
          "| 建议进入下一轮修复 | %s |" % ("是" if s["fix_round_recommended"] else "否"), "",
          "## 状态（互不替代）", "", "| 状态 | 结论 |", "|---|---|"]
     L += ["| %s | %s |" % (k, v) for k, v in s["states"].items()]
     L += ["", "> LOCAL_QA_PASSED 需要：全部 SCRIPT 用例 PASS，ENV-007/008/009、INS-006 已由 Agent 记录为 PASS，"
-          "INS-001..004 至少一项 PASS，且 INS-005 PASS。", "", "## 用例", "",
+          "INS-001..004 至少一项 PASS（附实际工具调用或命令），INS-005 PASS，且没有证据不足的 PASS。", "", "## 用例", "",
           "| ID | 领域 | 类型 | 级别 | 结果 | 目标 | 实际 |", "|---|---|---|---|---|---|---|"]
     for c in cases:
         L.append("| %s | %s | %s | %s | **%s** | %s | %s |" % (c["id"], c["area"], c["execution_type"], c["severity"], c["result"],
@@ -855,7 +928,7 @@ python <designbuddy-qa>/scripts/designbuddy.py record --run <报告目录> --id 
 """
 
 
-def record(run_dir, cid, result, actual, evidence="", context="", reason=""):
+def record(run_dir, cid, result, actual, evidence="", context="", reason="", commands=None):
     run_dir = Path(run_dir)
     data = read_json(run_dir / "results.json")
     if result not in RESULTS:
@@ -869,7 +942,13 @@ def record(run_dir, cid, result, actual, evidence="", context="", reason=""):
         raise DBError("E_RECORD", "PASS 必须提供实际结果，以及证据或运行上下文")
     if result == "BLOCKED" and not reason:
         raise DBError("E_RECORD", "BLOCKED 必须说明外部条件（--reason）")
+    commands = [c for c in (commands or []) if c and c.strip()]
+    if result == "PASS" and cid in INS_IDS and not commands:
+        raise DBError("E_RECORD", "安装类用例 PASS 必须用 --commands 记录实际执行的工具调用或命令（谁执行、调用了什么）")
+    if result == "PASS" and not evidence:
+        raise DBError("E_RECORD", "PASS 必须提供 --evidence")
     case.update(result=result, actual=actual, evidence=evidence, error_or_block_reason=reason,
+                commands_or_actions=commands or case.get("commands_or_actions", []),
                 runtime_context=context or case["runtime_context"], recorded_at=now_iso())
     env = read_json(run_dir / "environment.json")
     write_reports(run_dir, data["run_id"], data["cases"], env)

@@ -39,13 +39,28 @@ for rel, want in sorted(manifest["files"].items()):
     else:
         print("- [MISMATCH] %s" % rel)
     bad += 1
+# Files the WorkBuddy client adds at install time (OBSERVED: WorkBuddy 5.7.7.0 / Windows).
+# Only the name is checked; the content is never read.
+PLATFORM_META = {"_user_meta.json"}
 expected = set(manifest["files"]) | {"templates/build-manifest.json"}
+unknown = 0
 for p in sorted(root.rglob("*")):
     if p.is_file() and "__pycache__" not in p.parts:
         rel = p.relative_to(root).as_posix()
-        if rel not in expected:
+        if rel in expected:
+            continue
+        if rel in PLATFORM_META:
+            print("- [PLATFORM-META] %s" % rel)
+        else:
             print("- [EXTRA] %s" % rel)
+            unknown += 1
 print("files_checked: %d" % len(manifest["files"]))
-print("overall: %s" % ("MATCH" if bad == 0 else "MISMATCH"))
+if bad:
+    overall, code = "MISMATCH", 1
+elif unknown:
+    overall, code = "MATCH_WITH_EXTRA", 3
+else:
+    overall, code = "MATCH", 0
+print("overall: %s" % overall)
 print("=== BRAND SKILL SELFCHECK END ===")
-sys.exit(0 if bad == 0 else 1)
+sys.exit(code)

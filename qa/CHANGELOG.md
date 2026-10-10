@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## designbuddy-qa 0.1.1 — 2026-10-11（修复 WorkBuddy 真机报告 qa-20261011-015550-2691）
+
+详见 `qa/FIX_REPORT.md`。
+
+### 修复
+
+- **FIX-01（P0）**：WorkBuddy 安装时写入的 `_user_meta.json` 导致 PKG-005 误报 FAIL。改为按文件名识别平台元数据（不读取内容）；新增 PKG-008，未知的额外文件仍判 FAIL。发布构建的 lint 仍然严格。
+- **FIX-02（P1，隐私）**：Windows 路径脱敏失效（JSON 转义、盘符大小写、斜杠方向），而 SEC-012 误报 PASS。改为结构化脱敏，并配独立的泄漏检测器。
+- **FIX-03（P1）**：INS 类 PASS 必须用 `record --commands` 记录实际执行者和工具调用；所有 Agent/人工 PASS 必须附 `--evidence`；新增"证据不足的 PASS"汇总，存在时 LOCAL_QA_PASSED 不能为 YES；明确 Agent 自行解包到 skills 目录属于 H5。
+- **FIX-04（P2）**：Brand Skill 的 selfcheck 把额外文件分成 PLATFORM-META、MATCH_WITH_EXTRA（退出码 3）、MISMATCH 三级。
+- **FIX-05（P2）**：environment.json 和报告头部显示包指纹；每个版本发布 PACKAGE_FINGERPRINT.txt。
+- **FIX-06（P3）**：Runner 临时目录改为 `<RUN>/.qa-work/`；Agent 文件放到 `<RUN>/agent-notes/`。
+
+### 发布方式
+
+- 输出到 `dist/v0.1.1/`。v0.1.0 的包保持原样，不会被覆盖。
+- 单元测试 17 个；SCRIPT 用例 57 个。
+
 ## designbuddy-qa 0.1.0 — 2026-10-10（QA 候选版，首个可安装版本）
 
 ### 新增

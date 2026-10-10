@@ -108,7 +108,7 @@ class RecordTests(unittest.TestCase):
                 qarunner.record(run, "INS-001", "PASS", "")
             with self.assertRaises(DBError):
                 qarunner.record(run, "PP-002", "BLOCKED", "x")
-            out = qarunner.record(run, "ENV-009", "PASS", "bash", context="unit test")
+            out = qarunner.record(run, "ENV-009", "PASS", "bash", evidence="version 命令输出 JSON", context="unit test")
             self.assertTrue(out["ok"])
             data = json.loads((Path(run) / "results.json").read_text(encoding="utf-8"))
             self.assertEqual(next(c for c in data["cases"] if c["id"] == "ENV-009")["result"], "PASS")
@@ -119,3 +119,84 @@ class RecordTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class FixRound1Tests(unittest.TestCase):
+    """Regression tests for issues found in WorkBuddy run qa-20261011-015550-2691 (v0.1.0)."""
+
+    def test_fix01_platform_meta_is_not_a_package_error(self):
+        from dbcore import package
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            sk = tmp / "designbuddy-qa"
+            shutil.copytree(ROOT / "designbuddy-qa", sk, ignore=shutil.ignore_patterns("__pycache__"))
+            (sk / "_user_meta.json").write_text('{"x": 1}', encoding="utf-8")
+            self.assertTrue(package.lint_skill(sk)["errors"])  # release lint stays strict
+            lint = package.lint_skill(sk, platform_files={"_user_meta.json"})
+            self.assertEqual(lint["errors"], [])
+            self.assertEqual(lint["platform_files"], ["_user_meta.json"])
+            (sk / "evil.txt").write_text("x", encoding="utf-8")
+            self.assertTrue(package.lint_skill(sk, platform_files={"_user_meta.json"})["errors"])
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_fix02_windows_paths_are_redacted_in_all_forms(self):
+        import os
+        old = os.environ.get("USERNAME")
+        os.environ["USERNAME"] = "jintaothom"
+        try:
+            ex = {"<SKILL>": "C:\\Users\\jintaothom\\.workbuddy\\skills\\designbuddy-qa", "<CWD>": "D:\\jintaothom\\proj"}
+            samples = [json.dumps({"p": "C:\\Users\\jintaothom\\.workbuddy\\skills\\designbuddy-qa"}),
+                       "d:\\jintaothom\\proj\\a", "D:/jintaothom/proj/a.zip", "c:/users/jintaothom/x", "e:\\jintaothom\\other\\y"]
+            for t in samples:
+                r = util.redact(t, ex)
+                self.assertNotIn("jintaothom", r.lower(), r)
+                self.assertEqual(util.leaks(r, ex), [], r)
+            self.assertTrue(util.leaks(samples[0], ex))  # the old check missed this JSON-escaped form
+            self.assertEqual(util.redact_obj({"a": ["d:\\jintaothom\\proj\\z"]}, ex), {"a": ["<CWD>\\z"]})
+        finally:
+            if old is None:
+                os.environ.pop("USERNAME", None)
+            else:
+                os.environ["USERNAME"] = old
+
+    def test_fix03_install_pass_requires_commands_and_evidence(self):
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            run = qarunner.run_all(str(tmp / "run"))["report_dir"]
+            with self.assertRaises(DBError):
+                qarunner.record(run, "INS-002", "PASS", "installed", evidence="selfcheck MATCH")
+            with self.assertRaises(DBError):
+                qarunner.record(run, "ENV-007", "PASS", "5.7.7.0", context="ctx")  # no evidence
+            out = qarunner.record(run, "INS-002", "PASS", "installed", evidence="selfcheck MATCH",
+                                  commands=["Skill Creator: install(path=<RUN_DIR>/artifacts/a.zip)"])
+            self.assertTrue(out["ok"])
+            data = json.loads((Path(run) / "results.json").read_text(encoding="utf-8"))
+            self.assertTrue(next(c for c in data["cases"] if c["id"] == "INS-002")["commands_or_actions"])
+            self.assertFalse((Path(run) / ".qa-work").exists())
+            self.assertFalse((Path(run) / "artifacts" / "_work").exists())
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_fix04_selfcheck_classifies_extra_files(self):
+        import subprocess
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            res = qarunner.run_fixture("brand-beta", tmp / "ws")
+            sk = Path(res["build"]["skill_dir"])
+            run = lambda: subprocess.run([sys.executable, str(sk / "scripts" / "selfcheck.py")], capture_output=True, text=True,  # noqa: E731
+                                         encoding="utf-8", env=qarunner._child_env())
+            (sk / "_user_meta.json").write_text("{}", encoding="utf-8")
+            p = run()
+            self.assertEqual(p.returncode, 0, p.stdout)
+            self.assertIn("PLATFORM-META", p.stdout)
+            (sk / "unexpected.txt").write_text("x", encoding="utf-8")
+            p = run()
+            self.assertEqual(p.returncode, 3, p.stdout)
+            self.assertIn("MATCH_WITH_EXTRA", p.stdout)
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_fix05_weak_evidence_blocks_local_qa_passed(self):
+        cases = [{"id": "INS-002", "execution_type": "AGENT", "result": "PASS", "evidence": "x", "commands_or_actions": []}]
+        self.assertTrue(qarunner.weak_evidence(cases))
