@@ -3,9 +3,9 @@
 由 `tools/build_commercial.py` 自动生成，是开发机上的本地验证证据，**不代表平台解析、审核或付费加密环境中的结果**。
 
 - ZIP：`designbuddy-v1.0.0.zip`
-- ZIP SHA-256：`e3bea5a57617095ad95f109b3a905bb1ae1a33a6ee0c77652fb50f78464c557f`
-- package-manifest SHA-256：`23b27cdb4eec617ca0ca33b386f2e34cea90f651c01b12a562c76af62394cdd9`
-- 根目录：`designbuddy/`；28 个文件；150667 bytes；lint 0 错误
+- ZIP SHA-256：`a5bb610e02bad5864405683baa55936f1ab0dd3d8eb459e5ec917b5c3ce1e8c4`
+- package-manifest SHA-256：`8425ac3f487fe8aa8f74f3ad0d5cd0b9af319bb7c05e5babaef0bf1fc5ea636e`
+- 根目录：`designbuddy/`；28 个文件；150663 bytes；lint 0 错误
 - 已剔除 QA 专用内容：templates/fixtures, scripts/dbcore/qarunner.py, references/qa-protocol.md；对 9 个禁用词的扫描结果：无命中
 
 | 检查 | 结果 |

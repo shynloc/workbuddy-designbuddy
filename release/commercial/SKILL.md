@@ -6,7 +6,7 @@ description: "当用户想为自己的公司、个人品牌、自媒体 IP 或�
 description_zh: "通过对话建立你的品牌设计系统，编译成可安装的品牌 Skill、可移植的 Design System（DESIGN.md + Tokens）和预览样例，全部在本地完成。"
 description_en: "Build your brand design system through conversation and compile it into an installable Brand Skill, a portable design system (DESIGN.md + tokens) and previews, all locally."
 version: 1.0.0
-author: "DesignBuddy"
+author: "ShyNloc"
 user-invocable: true
 disable-model-invocation: false
 ---
