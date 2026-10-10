@@ -41,6 +41,8 @@ DesignBuddy 由三层组成：
 
 ## 2. DesignBuddy 包结构（付费 Skill 本体）
 
+> **2026-10-11 实现说明**：开放平台只接受两级目录（A10）。实际包结构为 `scripts/db_*.py` 与平铺的 `templates/<类别>.<文件>`，下面的树仅表示逻辑分组。
+
 ```
 designbuddy/
 ├── SKILL.md                         # 触发、阶段路由、Gate 协议摘要、关键纪律（≤ 2.5k tokens）

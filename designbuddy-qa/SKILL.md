@@ -2,16 +2,16 @@
 name: designbuddy-qa
 display_name: "DesignBuddy QA（测试候选版）"
 display_name_en: "DesignBuddy QA (Test Candidate)"
-description: "DesignBuddy 的 QA 测试候选版（v0.1.3），不是商业正式版。当用户说“DesignBuddy QA”、“运行全量本地验收测试”、“QA RUN ALL”，或明确要求用 DesignBuddy QA 为某个品牌建立品牌设计系统、编译 Brand Skill、导出 Portable Design System 时使用。其他场景不要使用。"
+description: "DesignBuddy 的 QA 测试候选版（v0.1.4），不是商业正式版。当用户说“DesignBuddy QA”、“运行全量本地验收测试”、“QA RUN ALL”，或明确要求用 DesignBuddy QA 为某个品牌建立品牌设计系统、编译 Brand Skill、导出 Portable Design System 时使用。其他场景不要使用。"
 description_zh: "DesignBuddy QA 测试候选版：品牌系统编译器（Brand IR → Brand Skill + Portable Design System + Preview）与内置全量验收测试。"
 description_en: "DesignBuddy QA test candidate: brand system compiler (Brand IR → Brand Skill + Portable Design System + Preview) with a built-in acceptance test runner."
-version: 0.1.3
+version: 0.1.4
 author: "DesignBuddy"
 user-invocable: true
 disable-model-invocation: false
 ---
 
-# DesignBuddy QA v0.1.3（测试候选版）
+# DesignBuddy QA v0.1.4（测试候选版）
 
 这是 DesignBuddy 的**测试候选版**，用于在真实 WorkBuddy 中验证功能，**不是商业正式版**。它包含两部分：
 

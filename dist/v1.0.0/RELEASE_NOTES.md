@@ -20,6 +20,10 @@
 
 由 QA 候选版 v0.1.0 → v0.1.3 演进而来，经过 3 轮修复（包括两轮 Windows 真机测试）。剔除了 QA Runner 和测试夹具。
 
+## 包结构
+
+两级目录（根目录/二级目录/文件），符合开放平台解析要求。生成的品牌 Skill 同样是两级目录。
+
 ## 校验
 
 见 `SHA256SUMS.txt`、`PACKAGE_FINGERPRINT.txt`、`BUILD_VERIFICATION.md`。

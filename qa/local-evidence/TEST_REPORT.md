@@ -1,9 +1,9 @@
 # DesignBuddy QA 测试报告
 
-- Run ID：`qa-20261010-201338-5e39`
-- DesignBuddy：0.1.3（designbuddy-qa）
+- Run ID：`qa-20261010-203110-4ceb`
+- DesignBuddy：0.1.4（designbuddy-qa）
 - 环境：Linux-6.18.44-fc-v114-x86_64-with-glibc2.39 · Python 3.13.16 · WorkBuddy 版本：UNKNOWN（由 Agent 记录：ENV-007）
-- 安装包指纹：version 0.1.3 · package-manifest SHA-256 `ee34d3637169c2702f18af0a60ca4cd6e3e7cd0c8a1fbf074eb36439defe63d1`
+- 安装包指纹：version 0.1.4 · package-manifest SHA-256 `b94f37a1e0da8890c99cd0de60e74bc3fce67ec9368210538e85e4159c878811`
 
 ## 汇总
 
@@ -41,14 +41,14 @@
 | ENV-007 | ENV | AGENT | P2 | **NOT_TESTED** | 记录 WorkBuddy 客户端版本 | 需要 Agent 在 WorkBuddy 中记录 |
 | ENV-008 | ENV | AGENT | P1 | **NOT_TESTED** | 记录 Skill 安装形态：本地/市场、是否付费、是否加密、开发者/购买者 | 需要 Agent 在 WorkBuddy 中记录 |
 | ENV-009 | ENV | AGENT | P2 | **NOT_TESTED** | 记录 Agent 实际使用的 shell 与命令执行方式 | 需要 Agent 在 WorkBuddy 中记录 |
-| PKG-001 | PKG | SCRIPT | P0 | **PASS** | SKILL.md frontmatter 合法且必填字段齐全 | name=designbuddy-qa version=0.1.3 |
+| PKG-001 | PKG | SCRIPT | P0 | **PASS** | SKILL.md frontmatter 合法且必填字段齐全 | name=designbuddy-qa version=0.1.4 |
 | PKG-002 | PKG | SCRIPT | P0 | **PASS** | 所有 @references 引用都能解析 | 检查 SKILL.md 中的引用 |
 | PKG-003 | PKG | SCRIPT | P0 | **PASS** | 必需脚本、模板、夹具存在 | 缺失：无 |
-| PKG-004 | PKG | SCRIPT | P1 | **PASS** | 安装后的包与发布构建一致（package-manifest） | 检查 48 个文件；不一致 无；缺失 无 |
-| PKG-005 | PKG | SCRIPT | P0 | **PASS** | 包内无绝对路径、密钥、字体、垃圾文件、非标准根目录项 | lint errors=0 warnings=0 files=49；平台元数据（另见 PKG-008）：['_user_meta.json'] |
-| PKG-006 | PKG | SCRIPT | P0 | **PASS** | 入口脚本可作为独立子进程执行 | exit=0 version=0.1.3 |
+| PKG-004 | PKG | SCRIPT | P1 | **PASS** | 安装后的包与发布构建一致（package-manifest） | 检查 47 个文件；不一致 无；缺失 无 |
+| PKG-005 | PKG | SCRIPT | P0 | **PASS** | 包内无绝对路径、密钥、字体、垃圾文件、非标准根目录项 | lint errors=0 warnings=0 files=48；平台元数据（另见 PKG-008）：['_user_meta.json'] |
+| PKG-006 | PKG | SCRIPT | P0 | **PASS** | 入口脚本可作为独立子进程执行 | exit=0 version=0.1.4 |
 | PKG-008 | PKG | SCRIPT | P1 | **PASS** | 安装副本中的额外文件：平台元数据与未知文件分开判定 | 平台元数据文件：['_user_meta.json']；未知额外文件：无 |
-| PKG-007 | PKG | SCRIPT | P0 | **PASS** | 运行时可读取内置模板 | 运行时读取模板成功：{'brand-skill/SKILL.md.tmpl': 2436, 'preview/poster.html.tmpl': 2044, 'preview/onepager.html.tmpl': 2327, 'portable/DESIGN.md.tmpl': 848} |
+| PKG-007 | PKG | SCRIPT | P0 | **PASS** | 运行时可读取内置模板 | 运行时读取模板成功：{'brand-skill.SKILL.md.tmpl': 2429, 'preview.poster.html.tmpl': 2044, 'preview.onepager.html.tmpl': 2327, 'portable.DESIGN.md.tmpl': 848} |
 | CORE-001 | CORE | SCRIPT | P0 | **PASS** | Existing 路径：导入→冲突检测→裁决→Brand IR | 检测到冲突 1 个，已裁决=True，release 校验错误 0，构建 ok=True |
 | CORE-002 | CORE | SCRIPT | P0 | **PASS** | Partial 路径：保留已知规则，补全缺口 | 主色保留 #9A3412(USER_CONFIRMED)；生成角色 ['ink', 'paper', 'surface', 'accent', 'on-primary', 'brand-text', 'success', 'warning', 'error', 'info']；标题字体 Source Han Serif |
 | CORE-003 | CORE | SCRIPT | P0 | **PASS** | New 路径：Discovery→2–3 个方向→选择→完整系统 | 候选方向 ['bold-technical', 'quiet-professional', 'editorial-modern'] → 选择 bold-technical |
@@ -59,7 +59,7 @@
 | CORE-008 | CORE | SCRIPT | P0 | **PASS** | Portable Design System（DESIGN.md + DTCG tokens + CSS） | 文件齐全=True；DESIGN.md 有 frontmatter=True；DTCG $type=color |
 | CORE-009 | CORE | SCRIPT | P1 | **PASS** | 生成可离线打开的 Preview | 预览 ['onepager.html', 'poster.html']；离线=True |
 | CORE-010 | CORE | SCRIPT | P0 | **PASS** | 单一事实来源：主色在 tokens.json / tokens.css / references / DESIGN.md / Preview 一致 | {"primary": "#1F4FD8", "checks": [true, true, true, true, true]} |
-| CORE-011 | CORE | SCRIPT | P1 | **PASS** | 同一输入两次构建结果可复现 | 比较 38 个文件（排除 generated_at）；差异 无；build_id 9bd761ee938a / 9bd761ee938a |
+| CORE-011 | CORE | SCRIPT | P1 | **PASS** | 同一输入两次构建结果可复现 | 比较 38 个文件（排除 generated_at）；差异 无；build_id 9df45b7847cf / 9df45b7847cf |
 | CORE-012 | CORE | SCRIPT | P1 | **PASS** | Brand Skill 自检：原样 MATCH，篡改后 MISMATCH | 原样：exit=0 MATCH；篡改后：exit=1 MISMATCH |
 | CORE-013 | CORE | SCRIPT | P1 | **PASS** | Alpha / Beta / Gamma 的 Brand Skill ZIP、Portable ZIP、Preview 已输出 | 已复制 9 个产物到 artifacts/ |
 | CORE-014 | CORE | SCRIPT | P1 | **PASS** | 交付包复制到下载文件夹（DesignBuddy/<品牌>/），附安装说明 | 交付到 <下载>/DesignBuddy/alpha-demo/：['alpha-demo-brand-system-1.0.0.zip', 'alpha-demo-portable-design-system-1.0.0.zip', 'preview/onepager.html', 'preview/poster.h |
@@ -69,7 +69,7 @@
 | QA-004 | QA | SCRIPT | P1 | **PASS** | 检测未批准颜色（预览与 Brand Skill 校验脚本） | 原始预览未批准颜色 无；注入后检出 ['#123456']；Brand Skill 的 validate_brand.py exit=1 |
 | QA-005 | QA | SCRIPT | P2 | **PASS** | 禁止规则：强调色不得用作文字 | 原始：{'preview.onepager.html.accent_not_text': 'PASS', 'preview.poster.html.accent_not_text': 'PASS'}；注入 color:var(--color-accent) 后被检出=True |
 | QA-006 | QA | SCRIPT | P1 | **PASS** | 字体缺失或未知时有回退栈且不打包 | 未知字体回退栈=['Songti SC', 'SimSun', 'Noto Serif SC', 'serif']；许可=UNKNOWN — 需用户确认；bundled=False |
-| QA-007 | QA | SCRIPT | P0 | **PASS** | 未授权资产不打包，manifest 记录排除原因 | manifest={'logo-main': True, 'pattern-3p': False}；Skill 内 SVG=['alpha-logo.svg']；Portable=['alpha-logo.svg'] |
+| QA-007 | QA | SCRIPT | P0 | **PASS** | 未授权资产不打包，manifest 记录排除原因 | manifest={'logo-main': True, 'pattern-3p': False}；Skill 内 SVG=['asset.fixture.alpha-logo.svg']；Portable=['fixture.alpha-logo.svg'] |
 | QA-008 | QA | SCRIPT | P1 | **PASS** | 检测互相矛盾的规则（MUST vs NEVER） | DBError E_IR_INVALID: Brand IR 校验失败：规则互相矛盾：MUST-COLOR-09, NEVER-COLOR-02（color.accent / use_as_text） |
 | QA-009 | QA | SCRIPT | P0 | **PASS** | 所有输出中不含字体文件 | 字体文件：无 |
 | QA-010 | QA | SCRIPT | P1 | **PASS** | Brand Skill 内容完整（17 个 references） | 缺失 references：[] |
@@ -105,7 +105,7 @@
 | PP-003 | PP | MANUAL | P1 | **BLOCKED** | 市场付费加密形态（普通购买者账号）：资源、脚本、生成器可用性 | BLOCKED: REQUIRES_PAID_ENCRYPTED_MARKETPLACE_RUNTIME |
 | UX-001 | UX | SCRIPT | P2 | **PASS** | 最短路径的用户决策次数 | 最短路径用户决策：Gate 决策 7 次 + 安装确认 1 次 + 选择保存目录 ≤1 次 = 9 |
 | UX-002 | UX | SCRIPT | P1 | **PASS** | 用户无需编写代码或临时设计通用模板 | 三条路径均由预置编译器完成，用户只做 KEEP/CHANGE 决策 |
-| UX-003 | UX | SCRIPT | P3 | **PASS** | 构建耗时 | 构建耗时（秒）：{'brand-alpha': 0.09, 'brand-beta': 0.08, 'brand-gamma-new': 0.07} |
+| UX-003 | UX | SCRIPT | P3 | **PASS** | 构建耗时 | 构建耗时（秒）：{'brand-alpha': 0.07, 'brand-beta': 0.05, 'brand-gamma-new': 0.05} |
 | UX-004 | UX | SCRIPT | P1 | **PASS** | 错误后可恢复，不破坏工作区 | 拦截后工作区仍有效；重复 init 被拒绝；修正 color.ink 后 G3 通过 |
 
 详细字段见 `results.json`；失败与阻塞见 `issues.md`；多品牌新会话测试见 `next-session-prompts.md`。

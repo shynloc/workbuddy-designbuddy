@@ -28,7 +28,7 @@ QA_DOCS = ROOT / "qa"
 sys.path.insert(0, str(SRC / "scripts"))
 sys.dont_write_bytecode = True
 
-from dbcore import package, qarunner, util  # noqa: E402
+import db_package as package, db_qarunner as qarunner, db_util as util  # noqa: E402
 
 VERSION = util.DESIGNBUDDY_VERSION
 ZIP_NAME = "designbuddy-qa-v%s.zip" % VERSION

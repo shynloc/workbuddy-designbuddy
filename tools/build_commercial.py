@@ -28,18 +28,18 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "designbuddy-qa"
 COMMERCIAL = ROOT / "release" / "commercial"
-FIX = SRC / "templates" / "fixtures"
+TPL = SRC / "templates"
 sys.path.insert(0, str(SRC / "scripts"))
 sys.dont_write_bytecode = True
 
-from dbcore import package, util  # noqa: E402
+import db_package as package, db_util as util  # noqa: E402
 
 VERSION = "1.0.0"
 NAME = "designbuddy"
 OUT = ROOT / "dist" / ("v%s" % VERSION)
 ZIP_NAME = "%s-v%s.zip" % (NAME, VERSION)
-REMOVE = ["templates/fixtures", "scripts/dbcore/qarunner.py", "references/qa-protocol.md"]
-FORBIDDEN = [r"qa-protocol", r"qarunner", r"templates/fixtures", r"Alpha Demo", r"Beta Demo", r"Gamma Demo",
+REMOVE_GLOBS = ["templates/fixture.*", "templates/fixture-bad.*", "scripts/db_qarunner.py", "references/qa-protocol.md"]
+FORBIDDEN = [r"qa-protocol", r"qarunner", r"fixture\.", r"fixture-bad", r"Alpha Demo", r"Beta Demo", r"Gamma Demo",
              r"测试候选版", r"QA RUN ALL", r"designbuddy-qa"]
 
 
@@ -58,17 +58,15 @@ def stage():
     shutil.rmtree(root, ignore_errors=True)
     st = root / NAME
     shutil.copytree(SRC, st, ignore=shutil.ignore_patterns("__pycache__", "*.pyc", ".DS_Store", "package-manifest.json"))
-    for rel in REMOVE:
-        t = st / rel
-        shutil.rmtree(t) if t.is_dir() else t.unlink()
+    for pat in REMOVE_GLOBS:
+        for t in st.glob(pat):
+            t.unlink()
     shutil.copyfile(COMMERCIAL / "SKILL.md", st / "SKILL.md")
-    u = st / "scripts" / "dbcore" / "util.py"
+    u = st / "scripts" / "db_util.py"
     s = u.read_text(encoding="utf-8")
     s = s.replace('DESIGNBUDDY_VERSION = "%s"' % util.DESIGNBUDDY_VERSION, 'DESIGNBUDDY_VERSION = "%s"' % VERSION)
     s = s.replace('SKILL_NAME = "designbuddy-qa"', 'SKILL_NAME = "%s"' % NAME)
     u.write_text(s, encoding="utf-8")
-    init = st / "scripts" / "dbcore" / "__init__.py"
-    init.write_text('"""DesignBuddy core. Standard library only."""\n', encoding="utf-8")
     cli = st / "scripts" / "designbuddy.py"
     lines = [l for l in cli.read_text(encoding="utf-8").splitlines(True)
              if not re.match(r"^  (fixture|run-all|record|finalize)\s", l)]
@@ -76,7 +74,7 @@ def stage():
     cc = st / "references" / "compiler-contract.md"
     cc.write_text("".join(l for l in cc.read_text(encoding="utf-8").splitlines(True)
                           if not l.startswith(("| `run-all", "| `record"))), encoding="utf-8")
-    dl = st / "scripts" / "dbcore" / "deliver.py"
+    dl = st / "scripts" / "db_deliver.py"
     dl.write_text(dl.read_text(encoding="utf-8").replace("QA helper: copy", "Copy"), encoding="utf-8")
     return st
 
@@ -178,10 +176,10 @@ def main():
         results["env"] = (c, (e or {}).get("environment", {}).get("package"))
         c, q, _ = run([sys.executable, str(entry), "run-all", "--out", str(tmp / "x")])
         results["qa_unavailable"] = (c, (q or {}).get("error", {}).get("code"))
-        results["existing"] = e2e(entry, tmp, "existing", FIX / "brand-alpha.json",
+        results["existing"] = e2e(entry, tmp, "existing", TPL / "fixture.brand-alpha.json",
                                   [("G1", "KEEP"), ("G2", "KEEP"), ("G3", "CHANGE", "resolve.conflict-colors-primary=#1F4FD8"),
                                    ("G3", "KEEP"), ("G4", "KEEP"), "preview", ("G5", "KEEP"), ("G6", "KEEP")])
-        results["new"] = e2e(entry, tmp, "new", FIX / "brand-gamma-new.json",
+        results["new"] = e2e(entry, tmp, "new", TPL / "fixture.brand-gamma-new.json",
                              [("G1", "KEEP"), ("G2", "KEEP", "direction=bold-technical"), ("G3", "KEEP"), ("G4", "KEEP"),
                               "preview", ("G5", "KEEP"), ("G6", "KEEP")])
     checks = {
@@ -208,7 +206,7 @@ def main():
          "由 `tools/build_commercial.py` 自动生成，是开发机上的本地验证证据，**不代表平台解析、审核或付费加密环境中的结果**。", "",
          "- ZIP：`%s`" % ZIP_NAME, "- ZIP SHA-256：`%s`" % zip_sha, "- package-manifest SHA-256：`%s`" % fingerprint,
          "- 根目录：`%s/`；%d 个文件；%d bytes；lint 0 错误" % (NAME, lint["files"], lint["bytes"]),
-         "- 已剔除 QA 专用内容：%s；对 %d 个禁用词的扫描结果：无命中" % (", ".join(REMOVE), len(FORBIDDEN)), "",
+         "- 已剔除 QA 专用内容：%s；对 %d 个禁用词的扫描结果：无命中" % (", ".join(REMOVE_GLOBS), len(FORBIDDEN)), "",
          "| 检查 | 结果 |", "|---|---|"]
     L += ["| %s | %s |" % (k, "PASS" if v else "FAIL") for k, v in checks.items()]
     L += ["", "## 端到端（从解压后的商业包运行 CLI，交付到临时的下载文件夹）", ""]

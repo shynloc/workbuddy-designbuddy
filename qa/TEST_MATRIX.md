@@ -1,4 +1,4 @@
-# TEST_MATRIX — DesignBuddy QA v0.1.3
+# TEST_MATRIX — DesignBuddy QA v0.1.4
 
 由 `tools/build_release.py` 从 QA Runner 的用例定义自动生成。Test ID 稳定，后续版本只新增、不重排。
 

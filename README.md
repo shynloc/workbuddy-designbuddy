@@ -11,11 +11,11 @@ DesignBuddy 是一个运行在 WorkBuddy 中的专业 **AI Brand System Builder 
 
 生成的 Brand Skill 通过 WorkBuddy 原生能力安装，安装前需要用户确认。
 
-> 当前阶段：**商业版 v1.0.0 已生成，等待产品负责人上传**：`dist/v1.0.0/designbuddy-v1.0.0.zip`，上传前请先看 [`dist/v1.0.0/RELEASE_CHECKLIST.md`](dist/v1.0.0/RELEASE_CHECKLIST.md)。QA 候选版的最新版本为 v0.1.3（`dist/v0.1.3/`）。
+> 当前阶段：**商业版 v1.0.0 已生成，等待产品负责人上传**：`dist/v1.0.0/designbuddy-v1.0.0.zip`，上传前请先看 [`dist/v1.0.0/RELEASE_CHECKLIST.md`](dist/v1.0.0/RELEASE_CHECKLIST.md)。QA 候选版的最新版本为 v0.1.4（`dist/v0.1.4/`）。
 
 ## 快速开始（测试人员）
 
-1. 下载 `dist/v0.1.3/designbuddy-qa-v0.1.3.zip`，在 WorkBuddy 中安装（先删除旧版本）；
+1. 下载 `dist/v0.1.4/designbuddy-qa-v0.1.4.zip`，在 WorkBuddy 中安装（先删除旧版本）；
 2. 新开会话，粘贴 [`qa/WORKBUDDY_QA_PROMPT.md`](qa/WORKBUDDY_QA_PROMPT.md)；
 3. 取回 `TEST_REPORT.md` 和 `results.json`。
 
@@ -25,7 +25,7 @@ DesignBuddy 是一个运行在 WorkBuddy 中的专业 **AI Brand System Builder 
 
 ```bash
 python3 -m unittest discover -s tests/unit          # 单元测试
-python3 designbuddy-qa/scripts/designbuddy.py run-all --out /tmp/qa   # 源码直接跑 QA
+python3 designbuddy-qa/scripts/designbuddy.py run-all --out /tmp/qa   # 源码直接跑 QA（包结构必须保持两级：根目录/二级目录/文件）
 python3 tools/build_release.py                       # QA 包：dist/v<版本>/（可复现）+ 本地证据
 python3 tools/build_commercial.py                    # 商业包：dist/v1.0.0/designbuddy-v1.0.0.zip + 验证
 ```

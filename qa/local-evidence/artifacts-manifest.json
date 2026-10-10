@@ -1,81 +1,81 @@
 {
-  "run_id": "qa-20261010-201338-5e39",
-  "designbuddy": "0.1.3",
+  "run_id": "qa-20261010-203110-4ceb",
+  "designbuddy": "0.1.4",
   "artifacts": [
     {
       "path": "artifacts/alpha-demo-brand-system-1.0.0.zip",
-      "bytes": 20102,
-      "sha256": "a9d207c7c8bed07ef08878262dee9a603b807b3e1fb57ac1f42fb864ea31c430"
+      "bytes": 20060,
+      "sha256": "cccc688aec5ebb2e50d5e704c2d85941d90619b2f705dbebea4ea05c73c74aae"
     },
     {
       "path": "artifacts/alpha-demo-portable-design-system-1.0.0.zip",
-      "bytes": 14056,
-      "sha256": "eae9f978bdb6cb335cdba117f1f888073ed2de30fa5cef5d81b2cc8f2c621471"
+      "bytes": 14079,
+      "sha256": "c93dd21c6d0c3a7e930d99343be81dca05ccf54fd17a929c10339179699c1e47"
     },
     {
       "path": "artifacts/beta-demo-brand-system-1.0.0.zip",
-      "bytes": 19921,
-      "sha256": "c64350278edc2ce76cdb1ad054ca9da9805fe72eba0d9ad1efc8427046e239ff"
+      "bytes": 19880,
+      "sha256": "3b8856243e21af47ab10853e3ff84062d2e703b856921cba58a59e1d7397a3f0"
     },
     {
       "path": "artifacts/beta-demo-portable-design-system-1.0.0.zip",
-      "bytes": 13690,
-      "sha256": "5246085b491f2b8f78ae8f22835a23f9e30878ee7faca01ccdb865f8d995addb"
+      "bytes": 13711,
+      "sha256": "fb5c14f8dd0be3c54af56ff47a55bb56375cdb52c78925329d2f25b10d1baaf9"
     },
     {
       "path": "artifacts/gamma-demo-brand-system-1.0.0.zip",
-      "bytes": 19276,
-      "sha256": "a2f5a67989ea523d8d97fe8ee48807471c8794c62e7507bafd9eea3ff66db195"
+      "bytes": 19207,
+      "sha256": "cee595915589b83eb078f0048e27022bc693fbd3cae8d3cf5c6bdccbf33c3af5"
     },
     {
       "path": "artifacts/gamma-demo-portable-design-system-1.0.0.zip",
-      "bytes": 12813,
-      "sha256": "712037beb90fd4662dca6e2a98a403919116b5de5ff7cc859f734e1dbcf9bd46"
+      "bytes": 12814,
+      "sha256": "f92c6452c5eab4cc104197bc95751605fe1d60c6a91a594dd14e7a04805e15c7"
     },
     {
       "path": "artifacts/preview-brand-alpha/onepager.html",
       "bytes": 4635,
-      "sha256": "392666c7a74b32ae404c3f9ad213e6c22cf1dead099efaffa0d629fcf0e9a910"
+      "sha256": "614e17ebb6ec565de24474c73e11ff3a11f40276d4ab185486b5411ef58b9ff7"
     },
     {
       "path": "artifacts/preview-brand-alpha/poster.html",
       "bytes": 3035,
-      "sha256": "43446592e4fcd99e5e9c5dad334dbb7b6287ec5a12600d99e0a4faf62997b57d"
+      "sha256": "8d3cf7198f921b47f0def7da26de689669e9e0315b46657e4572968566c4cf67"
     },
     {
       "path": "artifacts/preview-brand-beta/onepager.html",
       "bytes": 4632,
-      "sha256": "db369df6bca3c96b02f0cf696460223cd3ca0dfa06b2bf08eb362490580bb02b"
+      "sha256": "63b52c34d1c00143eb6a7134eb6a136e3607dadda9870c9140a82be6c246c6d3"
     },
     {
       "path": "artifacts/preview-brand-beta/poster.html",
       "bytes": 3009,
-      "sha256": "b74fa66a503958055958eb38197afa5e0ad49ebf19c2f720f6de3f125cefee4a"
+      "sha256": "c3d7e2bc10f9b38a35766fb06ff4fdd9612e6437df0b625846122ff4d100aa31"
     },
     {
       "path": "artifacts/preview-brand-gamma-new/onepager.html",
       "bytes": 4573,
-      "sha256": "92e427ee0b0fdd81024481c29a429c34b07f384a5b34d398e09d1d88014ab74e"
+      "sha256": "83af99931a6ea82542ca1b86121868067f262928d644882119d173899a348a9a"
     },
     {
       "path": "artifacts/preview-brand-gamma-new/poster.html",
       "bytes": 3000,
-      "sha256": "02332636a7764893b16699c3711a889c47ebade34dc8d0d253a76050e109b8a6"
+      "sha256": "57d810f61acea5cc66f626ab3eef7bbcd0917f2b9915737e3d5654b975208d77"
     },
     {
       "path": "artifacts/source-report-brand-alpha.md",
       "bytes": 3633,
-      "sha256": "492dbe304d863ab8664a83e5f321ae35a0f6216e47c75800f9d9ba67b9584faf"
+      "sha256": "d63a327ff5ec69bdbfb4fc590378634bfcbe89b5cb8e3e52314892799beed579"
     },
     {
       "path": "artifacts/source-report-brand-beta.md",
       "bytes": 4164,
-      "sha256": "7657db09f18ee0bd10c1016b3b224760a1a420ab58f7d8ce6edd3171cb4d49cf"
+      "sha256": "dd4fc2f1ff4591742e8a4f838675c1249e7fb1b009a25719e55aa3aa9a5edbc6"
     },
     {
       "path": "artifacts/source-report-brand-gamma-new.md",
       "bytes": 4108,
-      "sha256": "38bf2920442dc82d440232aba88686773532ea7a06a9d0d2e3ce94f79ae444a5"
+      "sha256": "7a1c5ad45475fb73768fc9a166dae4ae31991becc9c59af3edf44424b6fd72b9"
     }
   ]
 }

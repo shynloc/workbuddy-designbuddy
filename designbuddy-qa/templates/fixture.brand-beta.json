@@ -1,0 +1,26 @@
+{
+  "brief_version": "1.0.0",
+  "path": "partial",
+  "fixture": "Beta Demo 是 DesignBuddy QA 用的虚构品牌。路径：Partial（只有名称、Logo、主色）。",
+  "brand": {
+    "name": "Beta Demo", "name_zh": "贝塔示例", "name_en": "Beta Demo", "slug": "beta-demo",
+    "aliases": ["Beta", "贝塔"],
+    "industry": "独立书店与读书会（虚构）", "audience": "25–40 岁的城市阅读爱好者",
+    "positioning": "把阅读变成可以分享的周末生活方式",
+    "personality": ["温暖", "人文", "杂志"], "values": ["分享", "好奇"], "anti_personality": ["冷冰冰", "促销感"]
+  },
+  "known": {"colors": {"primary": "#9A3412"}},
+  "assets": [
+    {"id": "logo-main", "file": "fixture.beta-logo.svg", "type": "logo", "owner": "Beta Demo（虚构）", "license": "user-owned", "redistribution_allowed": true}
+  ],
+  "sources": [{"id": "src-logo", "type": "svg", "name": "beta-logo.svg（虚构）", "contains_sensitive_data": false, "extracted_items": ["colors"]}],
+  "fixture_decisions": [
+    {"gate": "G1", "decision": "KEEP"},
+    {"gate": "G2", "decision": "KEEP"},
+    {"gate": "G3", "decision": "KEEP"},
+    {"gate": "G4", "decision": "KEEP"},
+    {"step": "preview"},
+    {"gate": "G5", "decision": "KEEP"},
+    {"gate": "G6", "decision": "KEEP"}
+  ]
+}

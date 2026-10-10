@@ -39,6 +39,7 @@ last_updated: 2026-10-10
 | A6 | 根目录可以有官方结构以外的文件或目录（DESIGN.md、assets/ 等） | `UNVERIFIED` | 发布包实测时去掉了 README/CHANGELOG | V-PK-02 |
 | A7 | Skill 包的大小、文件数上限，以及能否包含二进制文件（字体、.potx 等） | `UNVERIFIED` | — | V-PK-04, V-OF-01 |
 | A8 | `category` 字段的可选值是否包含 `design` | `UNVERIFIED` | 开放平台前端文案中，专家类目里出现过 design（"设计"）选项；Skill 的 category 是否相同未确认。Probe 中暂不填写 category | V-PK-03 |
+| A10 | **Skill 包只支持两级目录结构（根目录/二级目录/文件），不允许更深的子目录** | `OBSERVED`（开放平台上传解析，2026-10-11："目录层级超限"） | designbuddy-v1.0.0 首次上传被拒；客户端本地导入不受此限（designbuddy-qa 当时有三级目录仍可导入）。已写入 lint |
 | A9 | `@references/x.md` 后紧跟中文标点时，WorkBuddy 能否正确解析路径 | `UNVERIFIED` | WB-OPDK 校验器会误判（`OBSERVED`，2026-10-10 本地预检）。编译器规定引用后必须紧跟空白字符（DERIVED） | — |
 
 ## B. 运行环境

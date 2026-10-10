@@ -13,10 +13,18 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "designbuddy-qa" / "scripts"))
 sys.dont_write_bytecode = True
 
-from dbcore import color as C, engine, ir as IR, qarunner, util, workspace as W  # noqa: E402
-from dbcore.util import DBError  # noqa: E402
+import db_color as C, db_engine as engine, db_ir as IR, db_qarunner as qarunner, db_util as util, db_workspace as W  # noqa: E402
+from db_util import DBError  # noqa: E402
 
-FIX = ROOT / "designbuddy-qa" / "templates" / "fixtures"
+TPL = ROOT / "designbuddy-qa" / "templates"
+
+
+def fx(name):
+    return TPL / ("fixture." + name)
+
+
+def bad(name):
+    return TPL / ("fixture-bad." + name)
 
 
 class ColorTests(unittest.TestCase):
@@ -66,12 +74,12 @@ class EngineTests(unittest.TestCase):
         shutil.rmtree(self.tmp, ignore_errors=True)
 
     def test_existing_conflict_detected(self):
-        ir = engine.intake(json.loads((FIX / "brand-alpha.json").read_text(encoding="utf-8")))
+        ir = engine.intake(json.loads((fx("brand-alpha.json")).read_text(encoding="utf-8")))
         self.assertEqual([c["field"] for c in ir["conflicts"]], ["colors.primary"])
         self.assertEqual(ir["conflicts"][0]["suggested"], "#1F4FD8")
 
     def test_new_path_has_three_candidates_and_no_system(self):
-        ir = engine.intake(json.loads((FIX / "brand-gamma-new.json").read_text(encoding="utf-8")))
+        ir = engine.intake(json.loads((fx("brand-gamma-new.json")).read_text(encoding="utf-8")))
         self.assertIsNone(ir["design_system"])
         self.assertEqual(len(ir["candidates"]), 3)
         self.assertEqual(ir["candidates"][0]["id"], "bold-technical")
@@ -84,13 +92,13 @@ class EngineTests(unittest.TestCase):
         self.assertEqual(qarunner._normalized_tree(a["build"]), qarunner._normalized_tree(b["build"]))
 
     def test_gate_order_enforced(self):
-        W.init(FIX / "brand-beta.json", self.tmp / "ws")
+        W.init(fx("brand-beta.json"), self.tmp / "ws")
         with self.assertRaises(DBError) as cm:
             W.gate(self.tmp / "ws", "G2", "KEEP")
         self.assertEqual(cm.exception.code, "E_GATE_ORDER")
 
     def test_duplicate_rule_ids_invalid(self):
-        brief = json.loads((FIX / "malformed-inputs" / "duplicate-rule-ids.json").read_text(encoding="utf-8"))
+        brief = json.loads(bad("duplicate-rule-ids.json").read_text(encoding="utf-8"))
         ir = engine.intake(brief)
         codes = [e["code"] for e in IR.validate(ir)["errors"]]
         self.assertIn("E_DUPLICATE_RULE", codes)
@@ -125,7 +133,7 @@ class FixRound1Tests(unittest.TestCase):
     """Regression tests for issues found in WorkBuddy run qa-20261011-015550-2691 (v0.1.0)."""
 
     def test_fix01_platform_meta_is_not_a_package_error(self):
-        from dbcore import package
+        import db_package as package
         tmp = Path(tempfile.mkdtemp())
         try:
             sk = tmp / "designbuddy-qa"
@@ -239,7 +247,7 @@ class FixRound2Tests(unittest.TestCase):
 class DeliverTests(unittest.TestCase):
     def test_downloads_override_and_no_overwrite(self):
         import os
-        from dbcore import deliver
+        import db_deliver as deliver
         tmp = Path(tempfile.mkdtemp())
         old = os.environ.get("DESIGNBUDDY_DOWNLOADS")
         try:
@@ -262,12 +270,47 @@ class DeliverTests(unittest.TestCase):
             shutil.rmtree(tmp, ignore_errors=True)
 
     def test_deliver_requires_build(self):
-        from dbcore import deliver
+        import db_deliver as deliver
         tmp = Path(tempfile.mkdtemp())
         try:
-            W.init(FIX / "brand-beta.json", tmp / "ws")
+            W.init(fx("brand-beta.json"), tmp / "ws")
             with self.assertRaises(DBError) as cm:
                 deliver.deliver(tmp / "ws", str(tmp))
             self.assertEqual(cm.exception.code, "E_NOT_BUILT")
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+
+class TwoLevelLayoutTests(unittest.TestCase):
+    """OBSERVED platform rule (2026-10-11): skill packages may only be root/dir/file."""
+
+    def test_lint_rejects_third_level(self):
+        import db_package as package
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            sk = tmp / "x-skill"
+            (sk / "references").mkdir(parents=True)
+            (sk / "SKILL.md").write_text("---\nname: x-skill\ndescription: d\ndescription_zh: d\ndescription_en: d\nversion: 1.0.0\nauthor: a\n---\n", encoding="utf-8")
+            (sk / "references" / "ok.md").write_text("ok", encoding="utf-8")
+            self.assertEqual(package.lint_skill(sk)["errors"], [])
+            (sk / "references" / "deep").mkdir()
+            (sk / "references" / "deep" / "no.md").write_text("no", encoding="utf-8")
+            self.assertTrue(any("层级" in e for e in package.lint_skill(sk)["errors"]))
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_source_package_and_generated_brand_skill_are_two_level(self):
+        import db_package as package
+        src = ROOT / "designbuddy-qa"
+        deep = [p.relative_to(src).as_posix() for p in src.rglob("*") if p.is_file() and "__pycache__" not in p.parts
+                and p.relative_to(src).as_posix().count("/") > 1]
+        self.assertEqual(deep, [])
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            res = qarunner.run_fixture("brand-alpha", tmp / "ws")
+            sk = Path(res["build"]["skill_dir"])
+            self.assertEqual(package.lint_skill(sk)["errors"], [])
+            self.assertTrue((sk / "templates" / "tokens.json").is_file())
+            self.assertTrue((sk / "templates" / "asset.fixture.alpha-logo.svg").is_file())
         finally:
             shutil.rmtree(tmp, ignore_errors=True)

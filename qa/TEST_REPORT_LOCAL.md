@@ -1,4 +1,4 @@
-# TEST_REPORT_LOCAL — DesignBuddy QA v0.1.3
+# TEST_REPORT_LOCAL — DesignBuddy QA v0.1.4
 
 开发机本地测试证据。由 `tools/build_release.py` 自动生成，**不代表 WorkBuddy 真机结果**。
 
@@ -6,8 +6,8 @@
 
 - 平台：Linux-6.18.44-fc-v114-x86_64-with-glibc2.39（x86_64）
 - Python：3.13.16；PATH 中的 node：True
-- 运行方式：把 `dist/v0.1.3/designbuddy-qa-v0.1.3.zip` 解压到含空格和中文的路径，并写入模拟的平台元数据 `_user_meta.json`（复现 WorkBuddy 5.7.7.0 的安装行为），然后从解压后的副本执行
-- 安装包：zip sha256 `29378cd23fe4b10f6395c6e3c3d53149292be699239a8f6a54ea7b32565fc99f`；package-manifest sha256 `ee34d3637169c2702f18af0a60ca4cd6e3e7cd0c8a1fbf074eb36439defe63d1`
+- 运行方式：把 `dist/v0.1.4/designbuddy-qa-v0.1.4.zip` 解压到含空格和中文的路径，并写入模拟的平台元数据 `_user_meta.json`（复现 WorkBuddy 5.7.7.0 的安装行为），然后从解压后的副本执行
+- 安装包：zip sha256 `9b7b70ea892f6f870f97d9cbf8ce21cf09516c48b0392461a4ba6e2e4e1c4531`；package-manifest sha256 `b94f37a1e0da8890c99cd0de60e74bc3fce67ec9368210538e85e4159c878811`
 - WorkBuddy：**未参与**（开发容器中没有 WorkBuddy 客户端）
 
 ## 结果
@@ -15,9 +15,9 @@
 | 项 | 结果 |
 |---|---|
 | 单元测试（tests/unit） | 通过 |
-| Skill lint（结构 / frontmatter / 引用 / 路径 / 密钥 / 字体） | errors=0 warnings=0，49 个文件，230652 bytes |
-| `version` | designbuddy-qa 0.1.3 |
-| `selftest`（package-manifest 完整性） | ok=True，48 个文件 |
+| Skill lint（结构 / frontmatter / 引用 / 路径 / 密钥 / 字体） | errors=0 warnings=0，48 个文件，230744 bytes |
+| `version` | designbuddy-qa 0.1.4 |
+| `selftest`（package-manifest 完整性） | ok=True，47 个文件 |
 | QA RUN ALL 用例 | 74 个 |
 | PASS / FAIL / PARTIAL / BLOCKED / NOT_TESTED | 59 / 0 / 0 / 2 / 13 |
 | SCRIPT 通过率 | 100.0%（59/59） |

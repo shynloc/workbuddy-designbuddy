@@ -8,14 +8,14 @@
 dist/v1.0.0/designbuddy-v1.0.0.zip
 ```
 
-ZIP 内的结构如下（共 28 个文件，符合 WorkBuddy Skill 规范）：
+ZIP 内的结构如下（共 27 个文件；开放平台只接受**两级目录**：根目录/二级目录/文件）：
 
 ```
 designbuddy/
 ├── SKILL.md                    # 就是本目录中的这个文件
 ├── references/  (4)            # design-workflow · compiler-contract · installation-handoff · safety
-├── scripts/     (12)           # designbuddy.py + dbcore/ 编译器
-└── templates/   (11)           # 品牌 Skill 模板、预览 / 可移植模板、方向库、字体库、package-manifest
+├── scripts/     (11)           # designbuddy.py + db_*.py 编译器模块
+└── templates/   (11)           # brand-skill.* / preview.* / portable.* 模板、data.* 方向库与字体库、package-manifest
 ```
 
 ZIP 由 `python3 tools/build_commercial.py` 从 `designbuddy-qa/` 的源码和本目录的 SKILL.md 生成。

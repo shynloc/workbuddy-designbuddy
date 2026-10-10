@@ -87,7 +87,7 @@
 ```
 workbuddy-skill/<slug>-brand-system/
   SKILL.md, references/（17 个）, scripts/（validate_contrast / validate_brand / selfcheck）,
-  templates/tokens/, templates/assets/, templates/build-manifest.json
+  templates/tokens.json · tokens.css · asset-manifest.json · font-manifest.json · build-manifest.json · asset.<文件名>（全部直接位于 templates/ 下：WorkBuddy 只允许两级目录）
 <slug>-brand-system-<ver>.zip                        ← 安装用，单一根目录
 portable-design-system/  DESIGN.md · brand-ir.json · tokens.json(DTCG) · tokens.css · manifests · assets/ · examples/
 <slug>-portable-design-system-<ver>.zip

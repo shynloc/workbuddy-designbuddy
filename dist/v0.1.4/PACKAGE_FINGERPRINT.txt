@@ -1,0 +1,4 @@
+designbuddy-qa 0.1.4
+zip sha256              9b7b70ea892f6f870f97d9cbf8ce21cf09516c48b0392461a4ba6e2e4e1c4531
+package-manifest sha256 b94f37a1e0da8890c99cd0de60e74bc3fce67ec9368210538e85e4159c878811
+报告 environment.json 中的 package.manifest_sha256 应与上面一致。

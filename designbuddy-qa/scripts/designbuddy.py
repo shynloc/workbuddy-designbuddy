@@ -32,8 +32,8 @@ if sys.version_info < (3, 8):
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.dont_write_bytecode = True
 
-from dbcore import util  # noqa: E402
-from dbcore.util import DBError  # noqa: E402
+import db_util as util  # noqa: E402
+from db_util import DBError  # noqa: E402
 
 
 def out(obj, code=0):
@@ -56,7 +56,7 @@ def parse_set(pairs):
 
 
 def _has_qa():
-    return (Path(__file__).resolve().parent / "dbcore" / "qarunner.py").is_file()
+    return (Path(__file__).resolve().parent / "db_qarunner.py").is_file()
 
 
 def main(argv=None):
@@ -92,19 +92,19 @@ def main(argv=None):
         if args.cmd in (None, "version"):
             return out({"ok": True, "name": util.SKILL_NAME, "version": util.DESIGNBUDDY_VERSION, "schema_version": util.SCHEMA_VERSION})
         if args.cmd == "env":
-            from dbcore import runtime, deliver
+            import db_runtime as runtime, db_deliver as deliver
             env = runtime.environment()
             d, how = deliver.downloads_dir()
             env["downloads"] = {"exists": d.is_dir(), "found_by": how}
             return out({"ok": True, "environment": env})
         if args.cmd == "selftest":
-            from dbcore import runtime
+            import db_runtime as runtime
             res = runtime.package_integrity()
             res["installed_extras"] = runtime.installed_extras()
             return out(res, 0 if res["ok"] else 1)
         if args.cmd in ("fixture", "run-all", "record", "finalize") and not _has_qa():
             return out({"ok": False, "error": {"code": "E_UNAVAILABLE", "message": "此版本不包含 QA Runner"}}, 2)
-        from dbcore import workspace as W
+        import db_workspace as W
         if args.cmd == "init":
             return out(W.init(args.brief, args.workspace, args.force))
         if args.cmd == "status":
@@ -112,7 +112,7 @@ def main(argv=None):
         if args.cmd == "gate":
             return out(W.gate(args.workspace, args.gate.upper(), args.decision.upper(), parse_set(args.set), args.note))
         if args.cmd == "validate":
-            from dbcore import ir as IR
+            import db_ir as IR
             data, _ = W.load(args.workspace)
             rep = IR.validate(data, "release" if args.release else "draft")
             return out(dict(rep, ok=not rep["errors"]), 0 if not rep["errors"] else 1)
@@ -122,31 +122,31 @@ def main(argv=None):
         if args.cmd == "build":
             res = W.build(args.workspace, args.force)
             if args.deliver and res["ok"]:
-                from dbcore import deliver
+                import db_deliver as deliver
                 try:
                     res["delivery"] = deliver.deliver(args.workspace, args.to)
                 except DBError as e:
                     res["delivery"] = e.as_dict()
             return out(res, 0 if res["ok"] else 1)
         if args.cmd == "deliver":
-            from dbcore import deliver
+            import db_deliver as deliver
             if args.run:
                 return out(deliver.deliver_run(args.run, args.to))
             return out(deliver.deliver(args.workspace, args.to))
         if args.cmd == "fixture":
-            from dbcore import qarunner
+            import db_qarunner as qarunner
             res = qarunner.run_fixture(args.name, Path(args.workspace))
             return out(res, 0 if res.get("ok") else 1)
         if args.cmd == "run-all":
-            from dbcore import qarunner
+            import db_qarunner as qarunner
             res = qarunner.run_all(args.out)
             return out(res, 0)
         if args.cmd == "finalize":
-            from dbcore import qarunner
+            import db_qarunner as qarunner
             res = qarunner.finalize(args.run)
             return out(res, 0 if res["ok"] else 1)
         if args.cmd == "record":
-            from dbcore import qarunner
+            import db_qarunner as qarunner
             return out(qarunner.record(args.run, args.id, args.result, args.actual, args.evidence, args.context, args.reason, args.commands))
     except DBError as e:
         return out(e.as_dict(), 2)

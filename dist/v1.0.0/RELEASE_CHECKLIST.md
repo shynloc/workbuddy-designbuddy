@@ -6,7 +6,7 @@
 
 | ✔ | 项 | 说明 |
 |---|---|---|
-| ☑ | **发布主体与 author** | 已改为认证主体名 `"ShyNloc"`（2026-10-11 重新打包）。之前 author="DesignBuddy" 的构建已作废，不要上传 |
+| ☑ | **发布主体与 author** | 已改为认证主体名 `"ShyNloc"`（2026-10-11 重新打包）。之前的构建（`e3bea5a5…` author 错误、`a5bb610e…` 目录层级超限被平台拒绝）均已作废，不要上传 |
 | ☐ | **价格** | 买断制，价格**必须是 1–9999 的整数**（开放平台 UI 文案，OBSERVED）。付费方式上架后不能更改，改价次数每年有限 |
 | ☐ | **服务类目**（个人主体） | 建议：工具 → 办公；辅类目：工具 → 图片处理。提交当天请重新核对官方类目页 |
 | ☐ | **市场分类** | 设计 |
@@ -16,10 +16,10 @@
 
 | 项 | 值 |
 |---|---|
-| 文件 | `designbuddy-v1.0.0.zip`（根目录 `designbuddy/`，28 个文件，约 150KB） |
+| 文件 | `designbuddy-v1.0.0.zip`（根目录 `designbuddy/`，27 个文件，**两级目录结构**） |
 | SHA-256 | 见 `SHA256SUMS.txt` |
 | 包指纹 | 见 `PACKAGE_FINGERPRINT.txt` |
-| 本地验证 | `BUILD_VERIFICATION.md`：6/6 PASS，并通过 WB-OPDK `validate_skill.py` |
+| 本地验证 | `BUILD_VERIFICATION.md`：6/6 PASS；通过 WB-OPDK `validate_skill.py`；最大目录层级 = 2 |
 | 不包含 | QA Runner、测试夹具、虚构品牌、字体文件、任何凭据 |
 
 ## C. 上传后：状态逐级确认（不能互相替代）
