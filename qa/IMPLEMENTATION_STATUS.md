@@ -1,4 +1,4 @@
-# IMPLEMENTATION_STATUS — DesignBuddy QA v0.1.1
+# IMPLEMENTATION_STATUS — DesignBuddy QA v0.1.3 / 商业版 v1.0.0
 
 状态取值：**DONE**（已实现，有自动化测试覆盖）· **PARTIAL**（部分实现）· **NOT_DONE**（未实现）· **PLATFORM**（需要 WorkBuddy 真机验证）
 
@@ -12,8 +12,8 @@
 | 4 | WorkBuddy Brand Skill + Portable Design System（含 DESIGN.md 和 Tokens） | DONE | `export_skill`、`export_portable`、`package.pack` | CORE-007/008/012 |
 | 5 | 可预览的品牌应用样例 | DONE | `templates/preview/`：poster.html、onepager.html（离线） | CORE-009 |
 | 6 | Brand QA、对比度、资产来源与许可、内容完整性与安全 | DONE | `dbcore/qa.py`、`package.lint_skill`、`util.safe_*` | QA-*、SEC-* |
-| 7 | 用户确认后的对话内安装交接 | PARTIAL | `references/installation-handoff.md`：协议 + Brand Skill 自带 selfcheck。实际交接由 Agent 在 WorkBuddy 中执行 | INS-000（SCRIPT）；INS-001..006（PLATFORM） |
-| 8 | QA RUN ALL，结构化结果 + Markdown 报告 | DONE | `dbcore/qarunner.py`、`designbuddy.py run-all / record`（v0.1.1：--commands、证据不足检测、包指纹、结构化脱敏、平台元数据分级） | 全部（71 个） |
+| 7 | 用户确认后的安装交接 | DONE（H4） | `references/installation-handoff.md`：协议 + Brand Skill 自带 selfcheck。实际交接由 Agent 在 WorkBuddy 中执行 | INS-000（SCRIPT）；INS-001..006（PLATFORM） |
+| 8 | QA RUN ALL，结构化结果 + Markdown 报告 | DONE | `dbcore/qarunner.py`、`designbuddy.py run-all / record`（--commands、证据不足检测、包指纹、结构化脱敏、平台元数据分级、finalize） | 全部（74 个） |
 
 ## 架构要求的落实情况
 
@@ -40,11 +40,20 @@ designbuddy-qa/                 ← 打包进 ZIP 的 Skill 本体
   SKILL.md
   references/  design-workflow · compiler-contract · installation-handoff · qa-protocol · safety
   scripts/designbuddy.py        ← CLI 入口（JSON 输出，稳定的退出码）
-  scripts/dbcore/               util · color · ir · engine · exporters · package · qa · workspace · qarunner
+  scripts/dbcore/               util · color · ir · engine · exporters · package · qa · workspace · deliver · runtime · qarunner（仅 QA 版）
   templates/brand-skill/        Brand Skill 的 SKILL.md 模板 + 3 个脚本模板
   templates/preview/ portable/  HTML / DESIGN.md / README 模板
   templates/data/               directions.json（6 个视觉方向）· fonts.json（10 款字体的许可摘要）
   templates/fixtures/           brand-alpha / brand-beta / brand-gamma-new + 12 个畸形输入
 tools/build_release.py          ← 单元测试 → 暂存 + package-manifest → lint → 打包 → 夹具品牌包 → 解压后全量测试 → 校验和
-tests/unit/                     ← 17 个 unittest（含 5 个 v0.1.1 修复回归测试）
+tests/unit/                     ← 21 个 unittest（含各轮修复的回归测试）
+tools/build_commercial.py       ← 商业版：剔除 QA 内容 → 打包 → 从解压包端到端验证
 ```
+
+## v0.1.3 / v1.0.0 新增
+
+| 要求 | 状态 | 说明 |
+|---|---|---|
+| 交付到下载文件夹 | DONE | `deliver` / `build --deliver` → `<下载>/DesignBuddy/<品牌>/`，不覆盖已有文件（CORE-014、SEC-014） |
+| 安装方式 | DONE | 客户端技能导入（H4，产品负责人实测可用）；H5 禁止 |
+| 商业版构建 | DONE | `dist/v1.0.0/designbuddy-v1.0.0.zip`（author: ShyNloc），见 `dist/v1.0.0/BUILD_VERIFICATION.md` |

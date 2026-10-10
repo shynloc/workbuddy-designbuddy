@@ -1,4 +1,4 @@
-# SPEC_DEVIATIONS — DesignBuddy QA v0.1.0
+# SPEC_DEVIATIONS — DesignBuddy（v0.1.0 起，截至 v1.0.0）
 
 本文记录与 PRD、架构文档或本轮需求不一致的地方，并说明理由。凡是影响产品定义的条目，都标注了"需确认"。
 
@@ -18,3 +18,5 @@
 | D-12 | Brand Skill 的 `author` | 默认填品牌名 | 在 brief 中未提供作者时的合理默认值 | 由用户在 G6 确认（需确认） |
 | D-13 | 报告目录"用户明确选择" | 优先使用当前项目文件夹下的 `DesignBuddy-QA-Reports/`，不确定时问一次 | 减少提问次数 | — |
 | D-14 | `references/` 文件名 | Brand Skill 中 PDF 规则合并在 `word.md`；共 17 个 references | 减少文件数量；PDF 与 Word 的文档规则高度重合 | 用户反馈后可拆分 |
+| D-15 | 架构要求以对话内安装为主路径（原生安装交接） | V1 的安装方式是：交付到下载文件夹 → 用户在客户端技能导入（H4） | 两轮真机测试证明 Agent 侧没有本地安装通道；H5 被禁止；产品负责人确认 H4 可用，并要求把交付文件放到下载文件夹 | 平台开放本地安装 API 后再评估 |
+| D-16 | 发布门槛 G-2 / G-4 / G-5（macOS、多品牌、真实品牌） | 由产品负责人豁免为发布后观察项 | 产品负责人决定 | 见 `dist/v1.0.0/KNOWN_LIMITATIONS.md` |
