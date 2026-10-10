@@ -670,6 +670,15 @@ def _sec_tests(R):
 
 
 REPORT_FILES = ("TEST_REPORT.md", "results.json", "issues.md", "environment.json", "artifacts-manifest.json")
+AGENT_NOTES = "agent-notes"
+TEXT_SUFFIXES = {".md", ".txt", ".json", ".log", ".csv"}
+
+
+def _agent_note_files(out):
+    d = Path(out) / AGENT_NOTES
+    if not d.is_dir():
+        return []
+    return [p for p in sorted(d.rglob("*")) if p.is_file() and p.suffix.lower() in TEXT_SUFFIXES]
 
 
 def _redaction_map(out):
@@ -678,12 +687,12 @@ def _redaction_map(out):
 
 def report_leaks(out):
     found = {}
-    for n in REPORT_FILES:
-        f = Path(out) / n
+    files = [Path(out) / n for n in REPORT_FILES] + _agent_note_files(out)
+    for f in files:
         if f.is_file():
-            hit = leaks(f.read_text(encoding="utf-8"), _redaction_map(out))
+            hit = leaks(f.read_text(encoding="utf-8", errors="replace"), _redaction_map(out))
             if hit:
-                found[n] = len(hit)
+                found[f.relative_to(Path(out)).as_posix()] = len(hit)
     return found
 
 
@@ -691,8 +700,8 @@ def _post_redaction_check(R):
     found = report_leaks(R.out)
     for c in R.cases:
         if c["id"] == "SEC-012":
-            c.update(ok(not found, "检查 %d 个报告文件（Windows/POSIX、正反斜杠、JSON 转义、盘符大小写、用户名路径段）；泄漏：%s" % (
-                len(REPORT_FILES), found or "无"), fix="检查 util.redact 是否覆盖该路径形式"))
+            c.update(ok(not found, "检查 %d 个报告文件 + agent-notes（Windows/POSIX、正反斜杠、JSON 转义、盘符大小写、用户名路径段）；泄漏：%s" % (
+                len(REPORT_FILES), found or "无"), fix="运行 finalize 命令对 agent-notes 脱敏；或检查 util.redact 是否覆盖该路径形式"))
             c["runtime_context"] = R.ctx
 
 
@@ -717,6 +726,8 @@ def _ins_tests(R):
     R.pending("INS-005", "INS", "安装后 Brand Skill selfcheck=MATCH、版本与关键规则一致", "MATCH", "P0", "AGENT", "NOT_TESTED",
               "需要先完成 INS-001..004 中至少一项", steps)
     R.pending("INS-006", "INS", "安装前已向用户展示摘要并取得明确确认", "有确认记录", "P0", "AGENT", "NOT_TESTED", "需要 Agent 记录", steps)
+    R.pending("INS-007", "INS", "记录 designbuddy-qa 本身是用哪种方式安装的（对话中附 ZIP 文件 / 客户端 UI 导入 / 其他），以及是否由平台完成", "如实记录；这是已知能装上本地 ZIP 的路径", "P1", "MANUAL", "NOT_TESTED",
+              "需要用户说明", ["询问用户：你是怎样把 designbuddy-qa 装进 WorkBuddy 的？", "根据 PKG-008：平台写入了 _user_meta.json 即说明由平台机制安装"])
 
 
 def _mb_tests(R):
@@ -926,6 +937,28 @@ PASS：明确 source=Beta Demo、target=Alpha Demo；输出只使用 Alpha 的�
 python <designbuddy-qa>/scripts/designbuddy.py record --run <报告目录> --id MB-003 --result PASS --actual "<实际回复摘要>" --evidence "<截图文件名>" --context "新会话 / macOS / WorkBuddy x.y"
 ```
 """
+
+
+def finalize(run_dir):
+    """Last step of a QA run: redact agent-authored notes in place, regenerate reports, re-check leaks."""
+    run_dir = Path(run_dir)
+    data = read_json(run_dir / "results.json")
+    red = _redaction_map(run_dir)
+    changed = []
+    for f in _agent_note_files(run_dir):
+        text = f.read_text(encoding="utf-8", errors="replace")
+        clean = redact(text, red)
+        if clean != text:
+            f.write_text(clean, encoding="utf-8")
+            changed.append(f.relative_to(run_dir).as_posix())
+    env = read_json(run_dir / "environment.json")
+    write_reports(run_dir, data["run_id"], data["cases"], env)
+    found = report_leaks(run_dir)
+    for c in data["cases"]:
+        if c["id"] == "SEC-012":
+            c.update(ok(not found, "finalize 后检查报告文件 + agent-notes；已脱敏 agent-notes 文件：%s；剩余泄漏：%s" % (changed or "无", found or "无")))
+    write_reports(run_dir, data["run_id"], data["cases"], env)
+    return {"ok": not found, "redacted_agent_notes": changed, "leaks": found, "summary": summarize(data["cases"])}
 
 
 def record(run_dir, cid, result, actual, evidence="", context="", reason="", commands=None):

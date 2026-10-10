@@ -56,7 +56,8 @@
 
 ### ENV-007 WorkBuddy 版本
 
-- 如果能从环境或用户提示词中得知版本，就记为 PASS，并写明来源。
+- 优先自己读取版本。已知位置（OBSERVED，Windows）：WorkBuddy 安装目录下的 `resources/install-manifest.json` 中的 `appVersion`，或 `WorkBuddy.exe` 的 ProductVersion。读到后记为 PASS，并写明来源。
+- 用户提示词中如果出现 `【】` 这类未填写的占位符，不要照抄进结果。
 - 否则记为 NOT_TESTED，reason 写"Agent 无法读取客户端版本"。
 
 ### ENV-008 安装形态
@@ -67,7 +68,18 @@
 
 记录实际执行命令的方式，例如"bash / zsh / PowerShell / 未知"，以及 `<PY>` 的实际值。
 
-## 4. 安装链路（INS-001 ~ INS-006）
+## 4. 安装链路（INS-001 ~ INS-007）
+
+### 已知平台事实（OBSERVED，WorkBuddy 5.7.7 / Windows 11，两轮测试）
+
+| 方式 | 实测结果 |
+|---|---|
+| H1 | `search_and_install_skills` 只能安装技能市场中的 Skill，不接受本地 ZIP 或目录 |
+| H2 | 内置的 `skill-creator` 只提供创建和打包引导（init_skill.py / package_skill.py），**没有安装执行器** |
+| H3（发送路径文字） | 用户发送"请把这个 ZIP 原样安装……：<路径>"后，会被转给 `marketplace-skill-installer`，最终仍然是只支持市场的 `search_and_install_skills` |
+| 平台 UI 或附件安装 | designbuddy-qa 本身是由平台装上的：安装目录里有平台写入的 `_user_meta.json` |
+
+结论：Agent 侧没有可用的本地安装通道。**H3b（附件）和 H4（UI 导入）是目前仅剩的候选路径，必须实际尝试。**
 
 1. 在 `<RUN>/artifacts/` 中找到以下两个文件：
    - `alpha-demo-brand-system-1.0.0.zip`
@@ -78,6 +90,15 @@
 
    **等用户明确回复后再继续。** 用户拒绝时：INS-001 ~ 005 记为 BLOCKED，reason 写"用户未授权安装"；INS-006 记为 PASS（确认流程已执行）。
 3. 依次尝试 H1 → H2 → H3 → H4，每种方式的实际结果分别回填 INS-001 ~ INS-004。
+
+   H3 分两种做法，都要试：
+
+   - **H3a**：用户发送一句带 ZIP 路径的安装指令；
+   - **H3b**：用户把 ZIP **作为文件附件**拖进对话框，再说"请原样安装为 Skill"。
+
+   两种做法的结果都写进 INS-003，在 `--actual` 中分别说明。
+
+   如果 H1~H3 都没有成功，**必须请用户执行 H4**（通过客户端的 Skill 导入入口手动导入 ZIP），并记录入口位置。用户拒绝时记为 NOT_TESTED，reason 写用户原话。
 
    **关于 H5 的界定**：如果安装动作是你（Agent）自己用 Bash 或文件工具把 ZIP 解压、复制到 WorkBuddy 的 Skill 目录（例如 `~/.workbuddy/skills/`），那就是被禁止的 H5，不算 H2。
 
@@ -90,11 +111,13 @@
    - 方式不存在或没有权限 → BLOCKED，写明原因；
    - 尝试后失败 → FAIL，写明错误原文；
    - 成功 → PASS，必须附 `--commands`。
-   - 已有一种方式成功后，H3、H4 可以不执行，记为 NOT_TESTED，reason 写"已有 <Hn> PASS，按协议作为备选未执行"。
+   - 已有一种方式成功后，其余方式可以不执行，记为 NOT_TESTED，reason 写"已有 <Hn> PASS，按协议作为备选未执行"。
+   - 由用户操作的方式（H3、H4）成功时，`--commands` 写"用户在 <位置> 执行了 <动作>"。安装后可以用 `_user_meta.json` 是否存在、selfcheck 的结果作为证据。
 4. INS-005：安装成功后，在已安装的 Brand Skill 目录中运行 `scripts/selfcheck.py`。
    - `overall: MATCH` → PASS；
    - 否则 → FAIL，附上 MISMATCH 列表。
 5. INS-006：记录你在安装前是否展示了摘要并取得确认，附上用户回复的原文。
+6. INS-007：询问用户"你是怎样把 designbuddy-qa 装进 WorkBuddy 的？（对话中附 ZIP / 客户端导入 / 其他）"，按原话记录。这是已知能装上本地 ZIP 的路径，结果直接影响产品的安装设计。
 
 ## 5. 多品牌（MB-003 ~ MB-005）
 
@@ -118,7 +141,21 @@
 
 3. 告诉用户报告的位置。
 
-## 7. 结束时给用户的汇报
+## 7. 收尾：finalize（必须执行）
+
+所有 `record` 回填完成后，最后执行一次：
+
+```
+<PY> "<SKILL>/scripts/designbuddy.py" finalize --run "<RUN>"
+```
+
+它会做三件事：
+
+1. 对 `agent-notes/` 中你写的文本文件做脱敏（主目录、用户名路径）；
+2. 重新生成报告；
+3. 重新执行 SEC-012 泄漏检查。
+
+## 8. 结束时给用户的汇报
 
 汇报内容只包括以下几项：
 

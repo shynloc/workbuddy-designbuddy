@@ -1,0 +1,39 @@
+{
+  "designbuddy": "0.1.1",
+  "skill": "designbuddy-qa",
+  "schema_version": "1.0.0",
+  "os": "linux",
+  "platform": "Linux-6.18.44-fc-v114-x86_64-with-glibc2.39",
+  "machine": "x86_64",
+  "python": {
+    "version": "3.13.16",
+    "implementation": "CPython"
+  },
+  "tools_on_path": {
+    "python3": true,
+    "python": true,
+    "py": false,
+    "node": true,
+    "bash": true,
+    "zsh": false,
+    "pwsh": false,
+    "powershell": false
+  },
+  "shell_hints": {
+    "SHELL": "bash",
+    "COMSPEC": null,
+    "PSModulePath": null,
+    "MSYSTEM": null,
+    "TERM_PROGRAM": null
+  },
+  "cwd": "<CWD>",
+  "skill_root": "<SKILL>",
+  "fs_encoding": "utf-8",
+  "workbuddy_version": "UNKNOWN（由 Agent 记录：ENV-007）",
+  "package": {
+    "version": "0.1.1",
+    "manifest_sha256": "45a2f988cd37ae49c7498672ad8cbd343489cdf9cd8e80b9a0fd2ff74b870f22",
+    "files": 46
+  },
+  "captured_at": "2026-10-10T18:45:56+00:00"
+}

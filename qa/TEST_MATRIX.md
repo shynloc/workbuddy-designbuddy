@@ -1,4 +1,4 @@
-# TEST_MATRIX — DesignBuddy QA v0.1.1
+# TEST_MATRIX — DesignBuddy QA v0.1.2
 
 由 `tools/build_release.py` 从 QA Runner 的用例定义自动生成。Test ID 稳定，后续版本只新增、不重排。
 
@@ -81,7 +81,7 @@
 | SEC-011 | SCRIPT | P1 | 输出限定在报告目录，Skill 自身不被修改 | 全部产物在 <run-dir>/artifacts | PASS |
 | SEC-012 | SCRIPT | P1 | 报告脱敏：不出现用户主目录绝对路径 | 报告中只有 <HOME>/<RUN_DIR> 占位 | PASS |
 
-## INS · 安装链路（7）
+## INS · 安装链路（8）
 
 | ID | 类型 | 级别 | 目标 | 预期 | 开发机结果 |
 |---|---|---|---|---|---|
@@ -92,6 +92,7 @@
 | INS-004 | MANUAL | P1 | H4：通过 UI 导入 ZIP | 安装成功，selfcheck=MATCH；或如实记录 BLOCKED | NOT_TESTED |
 | INS-005 | AGENT | P0 | 安装后 Brand Skill selfcheck=MATCH、版本与关键规则一致 | MATCH | NOT_TESTED |
 | INS-006 | AGENT | P0 | 安装前已向用户展示摘要并取得明确确认 | 有确认记录 | NOT_TESTED |
+| INS-007 | MANUAL | P1 | 记录 designbuddy-qa 本身是用哪种方式安装的（对话中附 ZIP 文件 / 客户端 UI 导入 / 其他），以及是否由平台完成 | 如实记录；这是已知能装上本地 ZIP 的路径 | NOT_TESTED |
 
 ## MB · 多品牌（5）
 
@@ -120,4 +121,4 @@
 | UX-003 | SCRIPT | P3 | 构建耗时 | 每个品牌 < 30 秒 | PASS |
 | UX-004 | SCRIPT | P1 | 错误后可恢复，不破坏工作区 | 失败后可修正并继续 | PASS |
 
-合计 71 个用例：AGENT 7、MANUAL 7、SCRIPT 57。
+合计 72 个用例：AGENT 7、MANUAL 8、SCRIPT 57。

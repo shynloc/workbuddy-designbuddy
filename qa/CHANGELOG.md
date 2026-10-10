@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## designbuddy-qa 0.1.2 — 2026-10-11（修复 WorkBuddy 真机报告 qa-20261011-025430-7c19）
+
+详见 `qa/FIX_REPORT.md`。
+
+- **FIX-07（P1，隐私）**：新增 `finalize` 命令，对 agent-notes 就地脱敏并重新检查；SEC-012 的扫描范围扩大到 agent-notes。
+- **FIX-08（P2）**：提示词去掉占位符；ENV-007 改为由 Agent 自行读取版本。
+- **FIX-09（P1，测试设计）**：H3 拆为 H3a（路径文字）和 H3b（ZIP 附件）；H1~H3 都失败时必须执行 H4；新增 INS-007（记录 designbuddy-qa 自身的安装方式）；协议写入两轮真机测试得到的平台事实。
+- **追溯更正**：v0.1.0 的 INS-002（H2 PASS）实际很可能是 H5，已标记为无效。
+- 单元测试 19 个；72 个用例（57 SCRIPT）。
+
 ## designbuddy-qa 0.1.1 — 2026-10-11（修复 WorkBuddy 真机报告 qa-20261011-015550-2691）
 
 详见 `qa/FIX_REPORT.md`。

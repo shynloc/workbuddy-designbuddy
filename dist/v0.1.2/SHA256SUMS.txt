@@ -1,0 +1,5 @@
+49c218b16a8568c16820323996c6d2bcf1923c0f15cfce7a5369a8043ac1b94b  designbuddy-qa-v0.1.2.zip
+efbdaebfed86353b989fb3ee82ce8679b64315cfd2dc919b4a6d8ed782c73dec  brand-alpha/alpha-demo-brand-system-1.0.0.zip
+7e9e7abc4f3dfa0f3b8c3537c47665c71f3c29a0fca7f79b7524a51337848097  brand-alpha/alpha-demo-portable-design-system-1.0.0.zip
+25be6dfcb024616dc87c87052234dcde4019d606129650b184bbdf56e4906d48  brand-beta/beta-demo-brand-system-1.0.0.zip
+1769f90d4b7332cd5713f82199140bc87021bdf9666cfeaad7ea906363324362  brand-beta/beta-demo-portable-design-system-1.0.0.zip

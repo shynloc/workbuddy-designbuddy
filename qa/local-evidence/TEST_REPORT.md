@@ -1,19 +1,19 @@
 # DesignBuddy QA 测试报告
 
-- Run ID：`qa-20261010-184556-af9a`
-- DesignBuddy：0.1.1（designbuddy-qa）
+- Run ID：`qa-20261010-195404-f1de`
+- DesignBuddy：0.1.2（designbuddy-qa）
 - 环境：Linux-6.18.44-fc-v114-x86_64-with-glibc2.39 · Python 3.13.16 · WorkBuddy 版本：UNKNOWN（由 Agent 记录：ENV-007）
-- 安装包指纹：version 0.1.1 · package-manifest SHA-256 `45a2f988cd37ae49c7498672ad8cbd343489cdf9cd8e80b9a0fd2ff74b870f22`
+- 安装包指纹：version 0.1.2 · package-manifest SHA-256 `c8e97bc5f9f100ff201c8f9ac5397849aea9bc49f7b3f0a6bbf25d938d249919`
 
 ## 汇总
 
 | 指标 | 数值 |
 |---|---|
-| 用例总数 | 71 |
-| PASS / FAIL / PARTIAL / BLOCKED / NOT_TESTED | 57 / 0 / 0 / 2 / 12 |
+| 用例总数 | 72 |
+| PASS / FAIL / PARTIAL / BLOCKED / NOT_TESTED | 57 / 0 / 0 / 2 / 13 |
 | 自动化（SCRIPT）通过率 | 100.0%（57/57） |
 | 问题数 P0 / P1 / P2 / P3 | 0 / 0 / 0 / 0 |
-| 未验证项 | 14（ENV-007, ENV-008, ENV-009, INS-001, INS-002, INS-003, INS-004, INS-005, INS-006, MB-003, MB-004, MB-005, PP-002, PP-003） |
+| 未验证项 | 15（ENV-007, ENV-008, ENV-009, INS-001, INS-002, INS-003, INS-004, INS-005, INS-006, INS-007, MB-003, MB-004, MB-005, PP-002, PP-003） |
 | 证据不足的 PASS | 无 |
 | 建议进入下一轮修复 | 否 |
 
@@ -41,12 +41,12 @@
 | ENV-007 | ENV | AGENT | P2 | **NOT_TESTED** | 记录 WorkBuddy 客户端版本 | 需要 Agent 在 WorkBuddy 中记录 |
 | ENV-008 | ENV | AGENT | P1 | **NOT_TESTED** | 记录 Skill 安装形态：本地/市场、是否付费、是否加密、开发者/购买者 | 需要 Agent 在 WorkBuddy 中记录 |
 | ENV-009 | ENV | AGENT | P2 | **NOT_TESTED** | 记录 Agent 实际使用的 shell 与命令执行方式 | 需要 Agent 在 WorkBuddy 中记录 |
-| PKG-001 | PKG | SCRIPT | P0 | **PASS** | SKILL.md frontmatter 合法且必填字段齐全 | name=designbuddy-qa version=0.1.1 |
+| PKG-001 | PKG | SCRIPT | P0 | **PASS** | SKILL.md frontmatter 合法且必填字段齐全 | name=designbuddy-qa version=0.1.2 |
 | PKG-002 | PKG | SCRIPT | P0 | **PASS** | 所有 @references 引用都能解析 | 检查 SKILL.md 中的引用 |
 | PKG-003 | PKG | SCRIPT | P0 | **PASS** | 必需脚本、模板、夹具存在 | 缺失：无 |
 | PKG-004 | PKG | SCRIPT | P1 | **PASS** | 安装后的包与发布构建一致（package-manifest） | 检查 46 个文件；不一致 无；缺失 无 |
 | PKG-005 | PKG | SCRIPT | P0 | **PASS** | 包内无绝对路径、密钥、字体、垃圾文件、非标准根目录项 | lint errors=0 warnings=0 files=47；平台元数据（另见 PKG-008）：['_user_meta.json'] |
-| PKG-006 | PKG | SCRIPT | P0 | **PASS** | 入口脚本可作为独立子进程执行 | exit=0 version=0.1.1 |
+| PKG-006 | PKG | SCRIPT | P0 | **PASS** | 入口脚本可作为独立子进程执行 | exit=0 version=0.1.2 |
 | PKG-008 | PKG | SCRIPT | P1 | **PASS** | 安装副本中的额外文件：平台元数据与未知文件分开判定 | 平台元数据文件：['_user_meta.json']；未知额外文件：无 |
 | PKG-007 | PKG | SCRIPT | P0 | **PASS** | 运行时可读取内置模板 | 运行时读取模板成功：{'brand-skill/SKILL.md.tmpl': 2436, 'preview/poster.html.tmpl': 2044, 'preview/onepager.html.tmpl': 2327, 'portable/DESIGN.md.tmpl': 848} |
 | CORE-001 | CORE | SCRIPT | P0 | **PASS** | Existing 路径：导入→冲突检测→裁决→Brand IR | 检测到冲突 1 个，已裁决=True，release 校验错误 0，构建 ok=True |
@@ -59,7 +59,7 @@
 | CORE-008 | CORE | SCRIPT | P0 | **PASS** | Portable Design System（DESIGN.md + DTCG tokens + CSS） | 文件齐全=True；DESIGN.md 有 frontmatter=True；DTCG $type=color |
 | CORE-009 | CORE | SCRIPT | P1 | **PASS** | 生成可离线打开的 Preview | 预览 ['onepager.html', 'poster.html']；离线=True |
 | CORE-010 | CORE | SCRIPT | P0 | **PASS** | 单一事实来源：主色在 tokens.json / tokens.css / references / DESIGN.md / Preview 一致 | {"primary": "#1F4FD8", "checks": [true, true, true, true, true]} |
-| CORE-011 | CORE | SCRIPT | P1 | **PASS** | 同一输入两次构建结果可复现 | 比较 38 个文件（排除 generated_at）；差异 无；build_id 69c08dd42588 / 69c08dd42588 |
+| CORE-011 | CORE | SCRIPT | P1 | **PASS** | 同一输入两次构建结果可复现 | 比较 38 个文件（排除 generated_at）；差异 无；build_id 559e0127c0ff / 559e0127c0ff |
 | CORE-012 | CORE | SCRIPT | P1 | **PASS** | Brand Skill 自检：原样 MATCH，篡改后 MISMATCH | 原样：exit=0 MATCH；篡改后：exit=1 MISMATCH |
 | CORE-013 | CORE | SCRIPT | P1 | **PASS** | Alpha / Beta / Gamma 的 Brand Skill ZIP、Portable ZIP、Preview 已输出 | 已复制 9 个产物到 artifacts/ |
 | QA-001 | QA | SCRIPT | P0 | **PASS** | WCAG 对比度计算与已知基准一致 | #000000/#FFFFFF=21.00 PASS; #777777/#FFFFFF=4.48 WARNING; #777777/#FFFFFF=4.48 PASS; #1F4FD8/#FFFFFF=6.63 PASS; #F59E0B/#FFFFFF=2.15 FAIL |
@@ -84,7 +84,7 @@
 | SEC-009 | SEC | SCRIPT | P0 | **PASS** | 不覆盖已存在的不同版本 Skill | DBError E_EXISTS: 导出目录中已有不同版本的 beta-demo-brand-system（build user-existing），不会覆盖。确认后使用 --force；原文件未被改动=True |
 | SEC-010 | SEC | SCRIPT | P0 | **PASS** | 不联网（静态检查网络模块） | 网络模块引用：无 |
 | SEC-011 | SEC | SCRIPT | P1 | **PASS** | 输出限定在报告目录，Skill 自身不被修改 | 产物均在报告目录内=True；Skill 自身文件未被修改=True |
-| SEC-012 | SEC | SCRIPT | P1 | **PASS** | 报告脱敏：不出现用户主目录绝对路径 | 检查 5 个报告文件（Windows/POSIX、正反斜杠、JSON 转义、盘符大小写、用户名路径段）；泄漏：无 |
+| SEC-012 | SEC | SCRIPT | P1 | **PASS** | 报告脱敏：不出现用户主目录绝对路径 | 检查 5 个报告文件 + agent-notes（Windows/POSIX、正反斜杠、JSON 转义、盘符大小写、用户名路径段）；泄漏：无 |
 | INS-000 | INS | SCRIPT | P0 | **PASS** | 代码中没有 H5（直接写入 WorkBuddy 内部 Skill 目录） | 代码中出现 WorkBuddy 安装目录的痕迹：无 |
 | INS-001 | INS | AGENT | P1 | **NOT_TESTED** | H1：原生安装工具（检查 Agent 工具列表中是否存在） | 需要在 WorkBuddy 中执行 |
 | INS-002 | INS | AGENT | P1 | **NOT_TESTED** | H2：交给内置 Skill Creator 原样安装（检查是否改写） | 需要在 WorkBuddy 中执行 |
@@ -92,6 +92,7 @@
 | INS-004 | INS | MANUAL | P1 | **NOT_TESTED** | H4：通过 UI 导入 ZIP | 需要在 WorkBuddy 中执行 |
 | INS-005 | INS | AGENT | P0 | **NOT_TESTED** | 安装后 Brand Skill selfcheck=MATCH、版本与关键规则一致 | 需要先完成 INS-001..004 中至少一项 |
 | INS-006 | INS | AGENT | P0 | **NOT_TESTED** | 安装前已向用户展示摘要并取得明确确认 | 需要 Agent 记录 |
+| INS-007 | INS | MANUAL | P1 | **NOT_TESTED** | 记录 designbuddy-qa 本身是用哪种方式安装的（对话中附 ZIP 文件 / 客户端 UI 导入 / 其他），以及是否由平台完成 | 需要用户说明 |
 | MB-001 | MB | SCRIPT | P1 | **PASS** | Alpha / Beta 的 description 含名称、别名，SKILL.md 含消歧规则 | brand-alpha: 名称/别名齐全=True 消歧规则=True；brand-beta: 名称/别名齐全=True 消歧规则=True |
 | MB-002 | MB | SCRIPT | P1 | **PASS** | Alpha / Beta 别名不重叠 | 别名交集：无 |
 | MB-003 | MB | MANUAL | P1 | **NOT_TESTED** | 独立新会话：「给 Alpha Demo 做一份 PPT 封面」只触发 Alpha | PENDING_MANUAL：必须在独立新会话中执行，本会话内的模拟不算数 |
@@ -102,7 +103,7 @@
 | PP-003 | PP | MANUAL | P1 | **BLOCKED** | 市场付费加密形态（普通购买者账号）：资源、脚本、生成器可用性 | BLOCKED: REQUIRES_PAID_ENCRYPTED_MARKETPLACE_RUNTIME |
 | UX-001 | UX | SCRIPT | P2 | **PASS** | 最短路径的用户决策次数 | 最短路径用户决策：Gate 决策 7 次 + 安装确认 1 次 + 选择保存目录 ≤1 次 = 9 |
 | UX-002 | UX | SCRIPT | P1 | **PASS** | 用户无需编写代码或临时设计通用模板 | 三条路径均由预置编译器完成，用户只做 KEEP/CHANGE 决策 |
-| UX-003 | UX | SCRIPT | P3 | **PASS** | 构建耗时 | 构建耗时（秒）：{'brand-alpha': 0.09, 'brand-beta': 0.08, 'brand-gamma-new': 0.07} |
+| UX-003 | UX | SCRIPT | P3 | **PASS** | 构建耗时 | 构建耗时（秒）：{'brand-alpha': 0.09, 'brand-beta': 0.09, 'brand-gamma-new': 0.08} |
 | UX-004 | UX | SCRIPT | P1 | **PASS** | 错误后可恢复，不破坏工作区 | 拦截后工作区仍有效；重复 init 被拒绝；修正 color.ink 后 G3 通过 |
 
 详细字段见 `results.json`；失败与阻塞见 `issues.md`；多品牌新会话测试见 `next-session-prompts.md`。

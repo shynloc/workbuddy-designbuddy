@@ -1,124 +1,90 @@
-# FIX_REPORT — DesignBuddy QA v0.1.0 → v0.1.1
+# FIX_REPORT — DesignBuddy QA v0.1.1 → v0.1.2
 
-## 1. 输入证据核对
+上一轮的修复报告见 `history/FIX_REPORT-v0.1.1.md`。
+
+## 1. 输入证据核对（报告 qa-20261011-025430-7c19）
 
 | 项 | 结果 |
 |---|---|
-| 报告 | `qa-20261011-015550-2691`：TEST_REPORT.md、results.json、environment.json、issues.md、artifacts-manifest.json、next-session-prompts.md、artifacts/（72 个文件，SHA-256 与 manifest 逐一一致） |
-| 版本 | designbuddy-qa 0.1.0，Brand IR schema 1.0.0 |
-| 环境 | Windows 11（10.0.26200）· WorkBuddy 5.7.7.0（ENV-007 证据：WorkBuddy.exe 的 ProductVersion）· Python 3.13.14 · Agent 通过 WorkBuddy 的 Bash 工具（Git Bash）执行，`<PY>`=python3 |
-| 安装形态 | 本地安装到用户级 skills 目录，未付费，未加密，开发者账号（ENV-008） |
-| 测试包哈希 | 报告中**没有直接记录 ZIP 哈希**（这本身是一个缺陷，见 FIX-05）。间接核对：PKG-004 用 46 个文件比对了 package-manifest，结果全部一致；文件数与 `dist/designbuddy-qa-v0.1.0.zip`（`39f31d91…`）相同。v0.1.0 只发布过这一个构建，可以认定被测包就是它 |
-| 跨平台可复现 | 报告中 Windows 生成的 `alpha-demo-brand-system-1.0.0.zip`，与 Linux 上用 v0.1.0 构建的结果逐文件一致（28/28，已排除 generated_at），build_id 相同（`00198c2fe97f`） |
-| 报告之外的文件 | `artifacts/_work/audit/`：Agent 安全审计时解压的副本，不是 Runner 的产物（Runner 在结束时已删除自己的 _work）；`artifacts/security-audit-alpha-beta.md`：Agent 写的审计报告（结论 P2 安全） |
+| 被测包 | designbuddy-qa **0.1.1**。`environment.json` 中的 `package.manifest_sha256` = `45a2f988…b870f22`，**与发布值完全一致**，确认测的就是交付的 v0.1.1 ZIP |
+| 环境 | Windows 11（10.0.26200）· WorkBuddy 5.7.7（来源：`resources/install-manifest.json` 的 appVersion）· python3 3.13.14 · Git Bash |
+| 跨平台可复现 | Windows 上生成的 alpha / beta build_id（`69c08dd42588` / `b948d8b0e13f`）与 Linux 上 v0.1.1 的构建一致 |
+| SCRIPT | **57/57 PASS** |
+| 报告完整性 | 6 个报告文件和 artifacts 齐全；Agent 自己写的文件放在了 `agent-notes/`（符合 FIX-06） |
 
-## 2. 结果分类
+## 2. v0.1.1 修复的真机验证结果
 
-| 类别 | 用例 |
-|---|---|
-| **FAIL** | PKG-005（P0） |
-| **证据不足的 PASS**（不能算通过） | INS-002（没有记录工具调用或命令，安装机制描述模糊，见 FIX-03）；INS-005 依赖 INS-002 的安装，**selfcheck 证据本身有效**，但安装方式待澄清 |
-| **被 SCRIPT 误判的 PASS** | SEC-012（报告脱敏）：v0.1.0 判 PASS，实际报告**泄漏**了 Windows 用户名路径（FIX-02） |
-| BLOCKED | INS-001（平台事实：`search_and_install_skills` 只能装市场 Skill）；PP-002、PP-003（需要付费加密市场环境） |
-| NOT_TESTED | INS-003、INS-004（H2 成功后作为备选未执行）；MB-003 ~ MB-005（需要独立新会话） |
-| 未覆盖 | macOS 整轮未测 |
-
-## 3. 缺陷与修复
-
-### FIX-01 · P0 · PKG-005 把平台写入的元数据当成包缺陷
-
-- **复现**：WorkBuddy 5.7.7.0 安装 Skill 时，会在根目录写入 `_user_meta.json`；随后 PKG-005 报"根目录存在非标准项"。
-- **根因**：构建期的严格 lint（检查我们自己的包）被原样用在了已安装副本上，而安装副本里有平台文件。
-- **修复**：
-  - `package.lint_skill(root, platform_files=...)`：平台元数据只按文件名识别，**不读取内容**（可能含用户信息），也不计入包错误。
-  - 新增 **PKG-008**：把安装副本中的额外文件分成"平台元数据"和"未知文件"；**出现未知文件就判 FAIL**。
-  - 发布构建的 lint 不传 `platform_files`，所以我们自己的 ZIP 永远不能包含 `_user_meta.json`。**安全标准没有放宽。**
-- **影响文件**：`scripts/dbcore/package.py`、`scripts/dbcore/qarunner.py`
-- **回归测试**：
-  - `test_fix01_platform_meta_is_not_a_package_error`：发布 lint 仍然报错；安装 lint 通过；再加入一个未知文件后报错。
-  - 构建工具在解压副本中写入模拟的 `_user_meta.json` 后，PKG-005 和 PKG-008 都通过。
-- **风险**：其他版本或系统可能写入不同名称的元数据。如果写了，PKG-008 会判 FAIL 并列出文件名，届时按真机证据补充白名单。
-
-### FIX-02 · P1 · 报告脱敏在 Windows 上失效，而 SEC-012 误报 PASS
-
-- **复现**：v0.1.0 的 `environment.json` 中，`skill_root` 为 `C:\\Users\\<用户名>\\.workbuddy\\…`，`cwd` 为 `d:\\<用户名>\\…`；`results.json` 中 Agent 回填的证据也包含用户名路径。
-- **根因**：
-  - 脱敏是对**已序列化的 JSON 字符串**做字面替换，而 Windows 路径在 JSON 中是双反斜杠，所以匹配不上；
-  - 没有处理盘符大小写（`d:` 和 `D:`）和正斜杠写法；
-  - SEC-012 用同样有缺陷的方法检查，于是误报 PASS。
-- **修复**：
-  - `util.redact` 覆盖原样、正斜杠、反斜杠、JSON 转义四种写法，忽略大小写，再兜底匹配通用用户目录模式和"用户名作为路径段"；
-  - `redact_obj` 改为在结构化数据上逐个字符串脱敏；
-  - `util.leaks` 作为独立的泄漏检测器；SEC-012 改为检查 5 个报告文件；
-  - `record` 回填的内容同样经过脱敏。
-- **影响文件**：`scripts/dbcore/util.py`、`scripts/dbcore/qarunner.py`
-- **回归测试**：
-  - `test_fix02_windows_paths_are_redacted_in_all_forms`：覆盖 Windows 的 5 种写法，并确认旧检查确实会漏掉 JSON 转义写法；
-  - 用真机报告原文验证：泄漏片段 environment.json 4 → 0，results.json 3 → 0。
-- **风险**：通用模式会把形如 `/home/xxx` 的普通文本也替换掉。这在报告场景中可以接受。
-
-### FIX-03 · P1 · 安装类 PASS 缺少可核查的执行证据
-
-- **问题**：INS-002 的 commands_or_actions 为空，描述是"经 Skill Creator 的用户级 Skill 目录机制……解包到用户级 skills 目录"。从证据**无法区分**是 Skill Creator 或平台安装的，还是 Agent 自己解包写入的。后者就是被禁止的 H5。
-- **修复**：
-  - `record` 新增 `--commands`。INS-001 ~ 005 的 PASS 必须写明"由谁执行、调用了什么"，所有 AGENT/MANUAL 的 PASS 都必须提供 `--evidence`。
-  - 汇总中新增"证据不足的 PASS"，只要存在，`LOCAL_QA_PASSED` 就不能为 YES。
-  - qa-protocol 和 installation-handoff 写明：**Agent 自己把文件解压或复制进 `~/.workbuddy/skills/` 就是 H5**，不能记作 H2。
-- **影响文件**：`qarunner.py`、`designbuddy.py`、`references/qa-protocol.md`、`references/installation-handoff.md`
-- **回归测试**：
-  - `test_fix03_install_pass_requires_commands_and_evidence`
-  - `test_fix05_weak_evidence_blocks_local_qa_passed`
-- **对 v0.1.0 结果的处理**：INS-002 视为**待澄清**。v0.1.1 真机复测时必须附上实际的工具调用。
-
-### FIX-04 · P2 · Brand Skill 的 selfcheck 对额外文件不分级
-
-- **修复**：
-  - `_user_meta.json` 记为 `PLATFORM-META`（结果仍为 MATCH，退出码 0）；
-  - 未知额外文件 → `MATCH_WITH_EXTRA`（退出码 3）；
-  - 内容被改动 → `MISMATCH`（退出码 1）。
-- **影响文件**：`templates/brand-skill/scripts/selfcheck.py.tmpl`
-- **回归测试**：`test_fix04_selfcheck_classifies_extra_files`
-
-### FIX-05 · P2 · 报告无法对应到具体安装包
-
-- **修复**：
-  - `environment.json` 新增 `package.version` 和 `package.manifest_sha256`，报告头部也显示这两项；
-  - 每个版本都发布 `PACKAGE_FINGERPRINT.txt`，内容是 ZIP 和 package-manifest 的 SHA-256。
-- **影响文件**：`qarunner.py`、`tools/build_release.py`
-
-### FIX-06 · P3 · Agent 文件与 Runner 临时目录混在一起
-
-- **修复**：
-  - Runner 的临时目录改为 `<RUN>/.qa-work/`，运行结束时删除，不再放在 `artifacts/` 下；
-  - 协议要求 Agent 把自己的文件放到 `<RUN>/agent-notes/`。
-- **回归测试**：`test_fix03…` 中断言 `.qa-work` 和 `artifacts/_work` 在运行后都不存在。
-- 本次改动顺带引入一个回归：`artifacts/` 目录不再被创建，导致 CORE-013 失败。已修复，并由 run-all 覆盖。
-
-## 4. 回归结论（开发机，Linux）
-
-| 项 | v0.1.0 | v0.1.1 |
+| 修复 | 真机证据 | 结论 |
 |---|---|---|
-| 单元测试 | 12/12 | **17/17**（新增 5 个修复回归测试） |
-| 包 lint | 0 错误 | 0 错误 |
-| 解压副本中的 SCRIPT 用例（含模拟的 `_user_meta.json`） | 56/56（未模拟平台文件） | **57/57**（新增 PKG-008） |
-| 可复现构建 | 是 | 是（两次构建，ZIP 的 SHA-256 一致） |
+| FIX-01 平台元数据 | PKG-005 PASS（`_user_meta.json` 被识别为平台文件）；PKG-008 PASS（没有未知文件） | ✅ 已在真机验证 |
+| FIX-02 Windows 脱敏 | SEC-012 PASS；Runner 生成的 6 个报告文件中，用户名出现 **0** 次 | ✅ 已在真机验证（但 agent-notes 有遗漏，见 FIX-07） |
+| FIX-03 安装证据 | INS-001/002/003/006 都附了 `commands_or_actions`；"证据不足的 PASS" = 无 | ✅ 已在真机验证 |
+| FIX-05 包指纹 | 报告头部和 environment.json 都显示了指纹，与发布值一致 | ✅ 已在真机验证 |
+| FIX-06 目录分离 | Runner 没有残留临时目录；Agent 文件在 `agent-notes/` | ✅ 已在真机验证 |
+| FIX-04 selfcheck 分级 | 本轮没有安装成功，未能执行 | ⏳ 未覆盖 |
 
-**没有删除任何测试；没有放宽任何安全检查。** 唯一被修改的旧测试是 `test_record_…`：它按旧规则只提供上下文就允许 PASS，新规则要求必须有证据，规则是收紧的。
+## 3. 结果分类
 
-## 5. 架构与兼容性
+| 类别 | 用例 | 说明 |
+|---|---|---|
+| FAIL | **INS-003**（P1） | 用户发送带路径的安装句后，被转给 `marketplace-skill-installer`，最终是只支持市场的 `search_and_install_skills`。**这是平台能力限制，不是包缺陷**，按协议如实记为 FAIL，不修改测试去掩盖 |
+| BLOCKED | INS-001 | 平台工具只支持市场 Skill |
+| BLOCKED | INS-002 | `skill-creator` 只提供创建和打包引导，没有安装执行器；唯一的替代做法是 H5，已按要求拒绝 |
+| BLOCKED | PP-002/003 | 需要付费加密环境 |
+| NOT_TESTED | INS-004 | 用户选择跳过 |
+| NOT_TESTED | INS-005 | 没有安装成功 |
+| NOT_TESTED | MB-003~005 | 前提是已安装 Brand Skill，安装链路没有走通 |
+| 遗漏 | macOS | 整轮未测 |
 
-- Brand IR schema 仍为 1.0.0，与 v0.1.0 的 Workspace 和 IR 完全兼容。
-- 编译器逻辑没有变化。同一个 IR 在 v0.1.1 下的 build_id 会变，这是因为 build_id 包含编译器版本，属于设计如此。
-- 没有改动 Local-first、安装需确认、不联网、保护用户数据等核心约束。
-- 从 v0.1.0 升级的方式：在 WorkBuddy 中删除旧的 `designbuddy-qa`，再安装 v0.1.1。Skill 名称没有变。
+## 4. 重要的追溯更正：v0.1.0 的 INS-002 很可能是 H5
 
-## 6. WorkBuddy 平台新事实（已写入 docs/runtime-capabilities.md）
+本轮实测证明，`skill-creator` **没有任何安装执行器**。因此 v0.1.0 报告中"H2 经 Skill Creator……原样解包到用户级 skills 目录"的 PASS，不可能是 Skill Creator 完成的。**最合理的解释是 Agent 自己把 ZIP 解压进了 `~/.workbuddy/skills/`，也就是 H5。**
 
-| 事实 | 等级 |
+- 该结果已在 `docs/runtime-validation-results.md` 中标记为**无效**。
+- 这件事也说明，FIX-03（安装类 PASS 必须附命令）是必要的。
+- 本轮 Agent 明确声明没有执行任何写入，并在事后核查 skills 目录确认没有 alpha / beta 条目。
+
+## 5. 本轮修复（v0.1.2）
+
+### FIX-07 · P1（隐私）· `agent-notes` 中仍有用户名路径
+
+- **复现**：`agent-notes/session-notes.md` 中出现 `C:/Users/<用户名>/.workbuddy/skills/`。
+- **根因**：脱敏只覆盖 Runner 自己生成的文件，Agent 自由书写的笔记没有经过脱敏；SEC-012 也没有扫描这个目录。
+- **修复**：
+  - 新增 `finalize --run <RUN>`：对 `agent-notes/` 中的文本文件就地脱敏，重新生成报告，再重新执行 SEC-012；
+  - SEC-012 的扫描范围扩大到 `agent-notes/`；
+  - 协议把 finalize 列为必须执行的最后一步。
+- **影响文件**：`qarunner.py`、`designbuddy.py`、`SKILL.md`、`references/qa-protocol.md`
+- **回归测试**：`test_fix07_finalize_redacts_agent_notes`
+
+### FIX-08 · P2 · 提示词里的 `【】` 占位符被照抄进结果
+
+- **现象**：ENV-007 / ENV-008 的 actual 中出现了"【macOS 15 / Windows 11】"等未填写的占位符。
+- **修复**：
+  - 新提示词不再有占位符，系统和 WorkBuddy 版本由 Agent 自己检测；
+  - 协议写明了已知的版本读取位置，并要求不要照抄占位符。
+
+### FIX-09 · P1（测试设计）· 安装链路覆盖不足
+
+- **问题**：H3 只测了"发送路径文字"，没测"把 ZIP 作为附件拖进对话"；H4 被跳过。可是 designbuddy-qa 自己就是被平台装上的（有 `_user_meta.json` 为证），说明**确实存在一条能装本地 ZIP 的平台路径，只是测试没覆盖到**。
+- **修复**：
+  - 协议把 H3 拆成 H3a（路径文字）和 H3b（ZIP 附件）；
+  - H1~H3 都失败时，H4 必须请用户执行；
+  - 新增 **INS-007**：记录 designbuddy-qa 本身是怎样安装的；
+  - 协议中写入两轮测试得到的平台事实。
+- **回归测试**：`test_fix09_ins007_present_and_manual`
+
+## 6. 回归结论（开发机）
+
+| 项 | 结果 |
 |---|---|
-| WorkBuddy 5.7.7.0 / Windows 11：Skill 执行环境有 python3 3.13.14；Agent 的 Bash 工具基于 Git Bash | OBSERVED（单机单次） |
-| 用户级 Skill 目录位于用户主目录下的 `.workbuddy/skills/<name>/` | OBSERVED |
-| 安装时会在 Skill 根目录写入 `_user_meta.json` | OBSERVED |
-| `search_and_install_skills` 只能安装技能市场中的 Skill，不接受本地 ZIP 或目录 | OBSERVED |
-| 由平台或 Skill Creator 安装的 Brand Skill，文件逐字节保持不变（selfcheck MATCH） | OBSERVED（安装机制待澄清，见 FIX-03） |
-| 编译器在 Windows 与 Linux 上的产物逐文件一致 | OBSERVED |
+| 单元测试 | 19/19（新增 2 个） |
+| 包 lint | 0 错误 |
+| 解压副本中的 SCRIPT 用例 | 57/57 |
+| 可复现构建 | 是（ZIP 的 SHA-256 一致） |
+
+没有删除或放宽任何测试。INS-003 的 FAIL 原样保留，因为它反映的是真实的平台能力。
+
+## 7. 需要你决策的事项（不在本次自动修复范围内）
+
+见 `DECISION_REQUEST_INSTALL.md`。如果平台路径（H3b/H4）对最终用户也不可用，"对话内一键安装"就只能用 H5 一类的方式实现，而这需要你单独批准。

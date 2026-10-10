@@ -16,6 +16,7 @@ Commands:
   fixture     --name brand-alpha|brand-beta|brand-gamma-new --workspace DIR   (runs a fixture end to end)
   run-all     [--out DIR]                     (QA RUN ALL)
   record      --run DIR --id TEST_ID --result R --actual TEXT [--evidence TEXT] [--context TEXT] [--reason TEXT] [--commands TEXT ...]
+  finalize    --run DIR                       (QA 结束前最后一步：agent-notes 脱敏 + 重新检查泄漏)
   selftest
 """
 import argparse
@@ -68,6 +69,7 @@ def main(argv=None):
     s = sub.add_parser("build"); s.add_argument("--workspace", required=True); s.add_argument("--force", action="store_true")
     s = sub.add_parser("fixture"); s.add_argument("--name", required=True); s.add_argument("--workspace", required=True)
     s = sub.add_parser("run-all"); s.add_argument("--out", default=None)
+    s = sub.add_parser("finalize"); s.add_argument("--run", required=True)
     s = sub.add_parser("record"); s.add_argument("--run", required=True); s.add_argument("--id", required=True)
     s.add_argument("--result", required=True); s.add_argument("--actual", required=True); s.add_argument("--evidence", default="")
     s.add_argument("--context", default=""); s.add_argument("--reason", default="")
@@ -113,6 +115,10 @@ def main(argv=None):
             from dbcore import qarunner
             res = qarunner.run_all(args.out)
             return out(res, 0)
+        if args.cmd == "finalize":
+            from dbcore import qarunner
+            res = qarunner.finalize(args.run)
+            return out(res, 0 if res["ok"] else 1)
         if args.cmd == "record":
             from dbcore import qarunner
             return out(qarunner.record(args.run, args.id, args.result, args.actual, args.evidence, args.context, args.reason, args.commands))

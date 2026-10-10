@@ -200,3 +200,37 @@ class FixRound1Tests(unittest.TestCase):
     def test_fix05_weak_evidence_blocks_local_qa_passed(self):
         cases = [{"id": "INS-002", "execution_type": "AGENT", "result": "PASS", "evidence": "x", "commands_or_actions": []}]
         self.assertTrue(qarunner.weak_evidence(cases))
+
+
+class FixRound2Tests(unittest.TestCase):
+    """Regression tests for issues found in WorkBuddy run qa-20261011-025430-7c19 (v0.1.1)."""
+
+    def test_fix07_finalize_redacts_agent_notes(self):
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            run = Path(qarunner.run_all(str(tmp / "run"))["report_dir"])
+            notes = run / "agent-notes"
+            notes.mkdir()
+            home = str(Path.home())
+            (notes / "session-notes.md").write_text("核查 %s/.workbuddy/skills/ 与 C:/Users/someone/.workbuddy/skills/\n" % home, encoding="utf-8")
+            self.assertTrue(qarunner.report_leaks(run))  # SEC-012 now sees agent-notes
+            res = qarunner.finalize(str(run))
+            self.assertTrue(res["ok"], res)
+            self.assertEqual(res["redacted_agent_notes"], ["agent-notes/session-notes.md"])
+            text = (notes / "session-notes.md").read_text(encoding="utf-8")
+            self.assertNotIn(home + "/", text)
+            self.assertNotIn("someone", text)
+            data = json.loads((run / "results.json").read_text(encoding="utf-8"))
+            self.assertEqual(next(c for c in data["cases"] if c["id"] == "SEC-012")["result"], "PASS")
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_fix09_ins007_present_and_manual(self):
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            run = Path(qarunner.run_all(str(tmp / "run"))["report_dir"])
+            data = json.loads((run / "results.json").read_text(encoding="utf-8"))
+            c = next(c for c in data["cases"] if c["id"] == "INS-007")
+            self.assertEqual((c["execution_type"], c["result"]), ("MANUAL", "NOT_TESTED"))
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
