@@ -1,0 +1,21 @@
+{
+  "brief_version": "1.0.0",
+  "path": "existing",
+  "brand": {
+    "name": "Mal Demo",
+    "slug": "lowc-demo",
+    "industry": "测试",
+    "audience": "测试",
+    "positioning": "测试",
+    "personality": [
+      "冷静"
+    ]
+  },
+  "known": {
+    "colors": {
+      "primary": "#1D4E89",
+      "ink": "#9CA3AF",
+      "paper": "#FFFFFF"
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "brief_version": "1.0.0",
+  "path": "partial",
+  "brand": {
+    "name": "Mal Demo",
+    "slug": "mal-demo",
+    "industry": "测试",
+    "audience": "测试",
+    "positioning": "测试",
+    "personality": [
+      "冷静"
+    ]
+  },
+  "known": {
+    "colors": {
+      "primary": "#1D4E89",
+      "accent": "#F59E0B"
+    },
+    "rules": [
+      {
+        "id": "MUST-COLOR-09",
+        "level": "MUST",
+        "text": "标题文字必须使用强调色",
+        "subject": "color.accent",
+        "action": "use_as_text"
+      }
+    ]
+  }
+}

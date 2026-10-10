@@ -1,0 +1,19 @@
+{
+  "brief_version": "1.0.0",
+  "path": "partial",
+  "brand": {
+    "name": "<script>alert('x')</script> Demo",
+    "slug": "xss-demo",
+    "industry": "测试",
+    "audience": "测试",
+    "positioning": "<img src=x onerror=alert(1)> | 定位",
+    "personality": [
+      "冷静"
+    ]
+  },
+  "known": {
+    "colors": {
+      "primary": "#1D4E89"
+    }
+  }
+}

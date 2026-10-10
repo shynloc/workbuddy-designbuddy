@@ -1,0 +1,59 @@
+---
+name: {{fm_name}}
+version: {{system_version}}
+generated_by: {{generated_by}}
+schema_version: {{schema_version}}
+colors:
+{{yaml_colors}}
+typography:
+  heading: {{yaml_heading}}
+  body: {{yaml_body}}
+  heading_weight: {{heading_weight}}
+spacing:
+  base: {{spacing_base}}
+radius: {{yaml_radius}}
+---
+
+# {{brand_name}} Design System
+
+> 可移植设计系统，适用于 Claude Code、Cursor、Codex、Stitch 等 AI 编码 / 设计工具。唯一事实来源是 `brand-ir.json`，本文件由它生成。
+
+## Overview
+
+{{positioning}}
+
+性格：{{personality}} · 视觉方向：{{direction_name}}
+
+## Colors
+
+| Token | 名称 | 值 | 用途 |
+|---|---|---|---|
+{{color_rows}}
+
+## Typography
+
+| 角色 | 字体 | 回退 |
+|---|---|---|
+{{type_rows}}
+
+字号阶梯（px）：{{type_scale}}
+
+## Layout
+
+- 间距刻度：{{spacing_scale}}
+- 圆角：{{radius}}
+- 栅格：{{grid}}
+
+## Imagery & Icons
+
+- 图片：{{imagery}}
+- 图标：{{iconography}}
+- 动效：{{motion}}
+
+## Voice
+
+{{voice}}
+
+## Do / Don't
+
+{{rules}}

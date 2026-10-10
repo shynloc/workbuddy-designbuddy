@@ -11,7 +11,32 @@ DesignBuddy 是一个运行在 WorkBuddy 中的专业 **AI Brand System Builder 
 
 生成的 Brand Skill 通过 WorkBuddy 原生能力安装，安装前需要用户确认。
 
-> 当前阶段：**开发前验证（第一轮 Probe）**。DesignBuddy 本体尚未开始实现。
+> 当前阶段：**QA 候选版 v0.1.0**——可安装到本地 WorkBuddy 的真实编译器 + 内置全量验收测试。尚未进行 WorkBuddy 真机验证，不用于上架。
+
+## 快速开始（测试人员）
+
+1. 下载 `dist/designbuddy-qa-v0.1.0.zip`，在 WorkBuddy 中安装；
+2. 新开会话，粘贴 [`qa/WORKBUDDY_QA_PROMPT.md`](qa/WORKBUDDY_QA_PROMPT.md)；
+3. 取回 `TEST_REPORT.md` 和 `results.json`。
+
+详见 [`qa/QA_TEST_GUIDE.md`](qa/QA_TEST_GUIDE.md)。
+
+## 开发者
+
+```bash
+python3 -m unittest discover -s tests/unit          # 单元测试
+python3 designbuddy-qa/scripts/designbuddy.py run-all --out /tmp/qa   # 源码直接跑 QA
+python3 tools/build_release.py                       # 构建 dist/（可复现）+ 本地证据
+```
+
+| 目录 | 内容 |
+|---|---|
+| `designbuddy-qa/` | Skill 本体（打包进 ZIP 的全部内容） |
+| `tools/` | 构建与发布工具 |
+| `tests/unit/` | 单元测试 |
+| `qa/` | 测试指南、提示词、测试矩阵、实现状态、偏离说明、开放问题、变更记录、本地测试证据 |
+| `dist/` | 安装包、夹具品牌包、校验和、发布说明 |
+| `tests/probes/` | 第一轮平台探针（已被 QA 候选版取代，保留作参考） |
 
 ## 文档
 

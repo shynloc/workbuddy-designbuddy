@@ -1,0 +1,22 @@
+{
+  "kb_version": "0.1.0",
+  "knowledge_type": "DERIVED",
+  "note": "许可信息为工程摘要，发布前与正式使用前须以各字体官方许可原文复核。DesignBuddy v0.1 不打包任何字体文件。",
+  "verified_at": "2026-10-10",
+  "families": {
+    "Source Han Sans SC": {"zh": "思源黑体", "category": "sans-serif", "license": "SIL OFL 1.1", "license_url": "https://github.com/adobe-fonts/source-han-sans/blob/release/LICENSE.txt", "commercial_use": true, "redistribution_allowed": true},
+    "Source Han Serif SC": {"zh": "思源宋体", "category": "serif", "license": "SIL OFL 1.1", "license_url": "https://github.com/adobe-fonts/source-han-serif/blob/release/LICENSE.txt", "commercial_use": true, "redistribution_allowed": true},
+    "Noto Sans SC": {"zh": "Noto 黑体", "category": "sans-serif", "license": "SIL OFL 1.1", "license_url": "https://fonts.google.com/noto/specimen/Noto+Sans+SC/license", "commercial_use": true, "redistribution_allowed": true},
+    "Noto Serif SC": {"zh": "Noto 宋体", "category": "serif", "license": "SIL OFL 1.1", "license_url": "https://fonts.google.com/noto/specimen/Noto+Serif+SC/license", "commercial_use": true, "redistribution_allowed": true},
+    "LXGW WenKai": {"zh": "霞鹜文楷", "category": "serif", "license": "SIL OFL 1.1", "license_url": "https://github.com/lxgw/LxgwWenKai/blob/main/OFL.txt", "commercial_use": true, "redistribution_allowed": true},
+    "Inter": {"zh": "Inter", "category": "sans-serif", "license": "SIL OFL 1.1", "license_url": "https://github.com/rsms/inter/blob/master/LICENSE.txt", "commercial_use": true, "redistribution_allowed": true},
+    "HarmonyOS Sans SC": {"zh": "鸿蒙黑体", "category": "sans-serif", "license": "HarmonyOS Sans Fonts License（厂商自有许可）", "license_url": "https://developer.huawei.com/consumer/cn/design/resource/", "commercial_use": "CHECK_LICENSE", "redistribution_allowed": false},
+    "Alibaba PuHuiTi": {"zh": "阿里巴巴普惠体", "category": "sans-serif", "license": "阿里巴巴普惠体字体许可（厂商自有许可）", "license_url": "https://www.alibabafonts.com/", "commercial_use": "CHECK_LICENSE", "redistribution_allowed": false},
+    "PingFang SC": {"zh": "苹方", "category": "sans-serif", "license": "Apple 系统字体（专有）", "license_url": "", "commercial_use": "SYSTEM_FONT_ONLY", "redistribution_allowed": false},
+    "Microsoft YaHei": {"zh": "微软雅黑", "category": "sans-serif", "license": "Microsoft 系统字体（专有）", "license_url": "", "commercial_use": "CHECK_LICENSE", "redistribution_allowed": false}
+  },
+  "fallbacks": {
+    "sans-serif": ["PingFang SC", "Microsoft YaHei", "Noto Sans SC", "sans-serif"],
+    "serif": ["Songti SC", "SimSun", "Noto Serif SC", "serif"]
+  }
+}

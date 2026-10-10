@@ -1,0 +1,65 @@
+{
+  "library_version": "0.1.0",
+  "directions": [
+    {
+      "id": "quiet-professional", "name_zh": "沉静专业", "name_en": "Quiet Professional",
+      "keywords": ["专业", "可靠", "稳重", "信任", "冷静", "咨询", "金融", "b2b", "professional", "trust", "calm"],
+      "seed_primary": "#1D4E89", "heading_font": "Source Han Sans SC", "body_font": "Source Han Sans SC", "heading_weight": 700,
+      "radius": "6px", "spacing_base": 8,
+      "imagery": "自然光、真实办公与人物场景，低饱和，避免夸张特效", "iconography": "1.5px 线性图标，圆角端点",
+      "motion": "克制：150–200ms 淡入，不使用弹跳", "voice_tone": "清晰、克制、以事实说话",
+      "layout": "12 栏栅格，充足留白，左对齐", "ppt": "白底内容页，标题左上，每页一个核心观点；主色仅用于强调",
+      "poster": "大标题 + 充足留白，主色色块不超过画面 30%"
+    },
+    {
+      "id": "editorial-modern", "name_zh": "现代编辑", "name_en": "Editorial Modern",
+      "keywords": ["人文", "杂志", "内容", "温暖", "叙事", "文化", "生活方式", "editorial", "story", "warm"],
+      "seed_primary": "#9A3412", "heading_font": "Source Han Serif SC", "body_font": "Source Han Sans SC", "heading_weight": 600,
+      "radius": "2px", "spacing_base": 8,
+      "imagery": "暖色调生活方式摄影，可配手绘质感插画", "iconography": "细线图标，少量使用",
+      "motion": "舒缓：250ms 渐显", "voice_tone": "亲切、有叙事感、允许适度修辞",
+      "layout": "不对称杂志栅格，衬线大标题，引言竖线", "ppt": "衬线大标题封面，内容页使用引言与大图",
+      "poster": "衬线大标题，大幅摄影，压图文字需加深色遮罩"
+    },
+    {
+      "id": "bold-technical", "name_zh": "锐利科技", "name_en": "Bold Technical",
+      "keywords": ["科技", "创新", "极客", "开发者", "ai", "数据", "高效", "未来", "tech", "bold", "developer"],
+      "seed_primary": "#4338CA", "heading_font": "Inter", "body_font": "Source Han Sans SC", "heading_weight": 800,
+      "radius": "10px", "spacing_base": 4,
+      "imagery": "抽象几何、界面截图、数据可视化，高对比", "iconography": "2px 几何线性图标",
+      "motion": "利落：120ms 位移+淡入", "voice_tone": "直接、自信、短句",
+      "layout": "高密度网格，模块化卡片", "ppt": "深色封面 + 浅色内容页，大数字与图表优先",
+      "poster": "强对比色块与超大字号，几何辅助图形"
+    },
+    {
+      "id": "fresh-minimal", "name_zh": "清新极简", "name_en": "Fresh Minimal",
+      "keywords": ["清新", "简约", "年轻", "健康", "自然", "轻松", "minimal", "fresh", "young"],
+      "seed_primary": "#0F766E", "heading_font": "Source Han Sans SC", "body_font": "Source Han Sans SC", "heading_weight": 600,
+      "radius": "14px", "spacing_base": 8,
+      "imagery": "明亮、留白多的产品与自然场景", "iconography": "圆润线性图标",
+      "motion": "轻快：180ms 缓出", "voice_tone": "轻松、友好、口语化但不随意",
+      "layout": "大留白，居中或简洁双栏", "ppt": "浅色背景，圆角卡片，配图留白",
+      "poster": "柔和底色，主体居中，留白≥40%"
+    },
+    {
+      "id": "premium-classic", "name_zh": "经典高级", "name_en": "Premium Classic",
+      "keywords": ["高端", "奢华", "精致", "经典", "品质", "premium", "luxury", "classic"],
+      "seed_primary": "#1F2937", "heading_font": "Noto Serif SC", "body_font": "Noto Sans SC", "heading_weight": 600,
+      "radius": "0px", "spacing_base": 8,
+      "imagery": "精致静物与质感特写，深色背景", "iconography": "极少使用图标，必要时用细线",
+      "motion": "缓慢：300ms 淡入", "voice_tone": "沉稳、精炼、不夸张",
+      "layout": "对称构图，宽边距", "ppt": "深色封面，金属/中性色点缀，衬线标题",
+      "poster": "深色底，居中衬线标题，大量负空间"
+    },
+    {
+      "id": "warm-human", "name_zh": "温暖亲和", "name_en": "Warm Human",
+      "keywords": ["亲和", "社区", "教育", "家庭", "陪伴", "公益", "温暖", "friendly", "community", "care"],
+      "seed_primary": "#B45309", "heading_font": "LXGW WenKai", "body_font": "Source Han Sans SC", "heading_weight": 600,
+      "radius": "12px", "spacing_base": 8,
+      "imagery": "真实人物互动，暖色自然光", "iconography": "圆角填充图标",
+      "motion": "柔和：220ms 缓入缓出", "voice_tone": "温暖、鼓励、贴近日常",
+      "layout": "宽松卡片，圆角，适度插画", "ppt": "暖色背景强调页 + 白底内容页",
+      "poster": "人物照片为主，手写感标题"
+    }
+  ]
+}

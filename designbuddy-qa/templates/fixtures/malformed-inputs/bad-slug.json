@@ -1,0 +1,19 @@
+{
+  "brief_version": "1.0.0",
+  "path": "partial",
+  "brand": {
+    "name": "Mal Demo",
+    "slug": "../evil",
+    "industry": "测试",
+    "audience": "测试",
+    "positioning": "测试",
+    "personality": [
+      "冷静"
+    ]
+  },
+  "known": {
+    "colors": {
+      "primary": "#1D4E89"
+    }
+  }
+}

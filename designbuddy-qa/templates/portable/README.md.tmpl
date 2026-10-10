@@ -1,0 +1,21 @@
+# {{brand_name}} — Portable Design System
+
+由 {{generated_by}} 生成 · Design System {{system_version}} · build {{build_id}}
+
+| 文件 | 用途 |
+|---|---|
+| `DESIGN.md` | 给 AI 编码 / 设计 Agent 阅读的设计规范（YAML tokens + Markdown） |
+| `brand-ir.json` | 唯一事实来源（Brand IR，schema {{schema_version}}） |
+| `tokens.json` | W3C DTCG 格式的 Design Tokens |
+| `tokens.css` | CSS 变量，可直接 `@import` |
+| `asset-manifest.json` / `font-manifest.json` | 资产与字体的来源和许可 |
+| `assets/` | 允许再分发的品牌资产 |
+| `examples/` | 离线预览样例 |
+
+## 使用方式
+
+- **Claude Code / Cursor / Codex**：把 `DESIGN.md` 放在项目根目录，或在提示词中引用它。
+- **Web 项目**：引入 `tokens.css`，使用 `var(--color-primary)` 等变量。
+- **设计工具**：导入 `tokens.json`（DTCG）。
+
+字体文件不随本包分发。请按 `font-manifest.json` 的许可说明自行安装。

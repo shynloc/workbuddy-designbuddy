@@ -1,0 +1,21 @@
+{
+  "brief_version": "1.0.0",
+  "path": "new",
+  "fixture": "Gamma Demo 是 DesignBuddy QA 用的虚构品牌。路径：New（没有任何视觉资产）。",
+  "brand": {
+    "name": "Gamma Demo", "name_zh": "伽马示例", "slug": "gamma-demo", "aliases": ["Gamma"],
+    "industry": "AI 效率工具（虚构）", "audience": "独立开发者与一人公司",
+    "positioning": "帮一个人完成一个团队的工作",
+    "personality": ["高效", "自信"], "values": ["专注"], "anti_personality": ["复杂", "老气"]
+  },
+  "discovery": {"keywords": ["科技", "AI", "高效", "开发者"], "liked_references": ["干净的开发者工具官网（只提炼原则）"]},
+  "fixture_decisions": [
+    {"gate": "G1", "decision": "KEEP"},
+    {"gate": "G2", "decision": "KEEP", "patch": {"direction": "bold-technical"}},
+    {"gate": "G3", "decision": "KEEP"},
+    {"gate": "G4", "decision": "KEEP"},
+    {"step": "preview"},
+    {"gate": "G5", "decision": "KEEP"},
+    {"gate": "G6", "decision": "KEEP"}
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "brief_version": "1.0.0",
+  "path": "existing",
+  "fixture": "Alpha Demo 是 DesignBuddy QA 用的虚构品牌。路径：Existing（已有完整规范，含一处来源冲突）。",
+  "brand": {
+    "name": "Alpha Demo", "name_zh": "阿尔法示例", "name_en": "Alpha Demo", "slug": "alpha-demo",
+    "aliases": ["Alpha", "阿尔法"],
+    "industry": "企业软件（虚构）", "audience": "中小企业的运营与财务负责人",
+    "positioning": "让中小企业的数据决策更简单、更可靠",
+    "personality": ["冷静", "精确", "可靠"], "values": ["透明", "效率"], "anti_personality": ["浮夸", "卡通"]
+  },
+  "voice": {"tone": "简洁、陈述句、少用感叹号", "preferred": ["数据", "清晰"], "avoid": ["颠覆", "史上最"]},
+  "known": {
+    "colors": {
+      "primary": [
+        {"value": "#1F4FD8", "source": "brand-guide.pdf"},
+        {"value": "#1F4FD8", "source": "website.css"},
+        {"value": "#2456DD", "source": "old-deck.pptx"}
+      ],
+      "ink": {"value": "#111827", "source": "brand-guide.pdf"},
+      "paper": {"value": "#FFFFFF", "source": "brand-guide.pdf"},
+      "accent": {"value": "#B45309", "source": "brand-guide.pdf"}
+    },
+    "fonts": {"heading": {"value": "Source Han Sans SC", "source": "brand-guide.pdf"}, "body": {"value": "Source Han Sans SC", "source": "brand-guide.pdf"}},
+    "heading_weight": 700,
+    "radius": "8px",
+    "rules": [{"id": "NEVER-PHOTO-01", "level": "NEVER", "text": "不得使用带水印的图库图片"}]
+  },
+  "assets": [
+    {"id": "logo-main", "file": "assets/alpha-logo.svg", "type": "logo", "owner": "Alpha Demo（虚构）", "license": "user-owned", "redistribution_allowed": true},
+    {"id": "pattern-3p", "file": "assets/third-party-pattern.svg", "type": "pattern", "owner": "未知第三方", "license": "unknown", "redistribution_allowed": false}
+  ],
+  "sources": [
+    {"id": "src-guide", "type": "pdf", "name": "brand-guide.pdf（虚构）", "contains_sensitive_data": false, "extracted_items": ["colors", "fonts", "rules"]},
+    {"id": "src-deck", "type": "pptx", "name": "old-deck.pptx（虚构，含内部数据）", "contains_sensitive_data": true, "extracted_items": ["colors"]}
+  ],
+  "fixture_decisions": [
+    {"gate": "G1", "decision": "KEEP"},
+    {"gate": "G2", "decision": "KEEP"},
+    {"gate": "G3", "decision": "CHANGE", "patch": {"resolve.conflict-colors-primary": "#1F4FD8"}},
+    {"gate": "G3", "decision": "KEEP"},
+    {"gate": "G4", "decision": "KEEP"},
+    {"step": "preview"},
+    {"gate": "G5", "decision": "KEEP"},
+    {"gate": "G6", "decision": "KEEP"}
+  ]
+}
